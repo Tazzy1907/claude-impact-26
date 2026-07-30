@@ -1,59 +1,84 @@
-import type { Question } from "@/lib/types";
+import dataset from "@/razor_quiz_dataset.json";
+import type { Question, TacticId } from "@/lib/types";
 
 /**
- * The question bank, transcribed from the `QUESTIONS` array in the Mindshield
- * design file. Statements, option order, answer keys and explanations are all
- * verbatim: the design is the specification, and option order in particular is
- * data rather than presentation, so nothing shuffles it at runtime.
+ * The question bank, derived from `razor_quiz_dataset.json`.
+ *
+ * That file is the source of truth and is not edited here — this module only
+ * maps its shape onto `Question`. Nothing imports it directly; go through
+ * `lib/content.ts`.
+ *
+ * The bank is balanced by construction: ten items each of three fallacies and
+ * ten whose reasoning actually holds. That last quarter is the point. Its
+ * items are written to *look* like one of the three, so the quiz cannot be
+ * passed by assuming something must be wrong.
  */
-export const QUESTIONS: Question[] = [
-  {
-    id: "q1-remote-work",
-    statement:
-      "My colleague suggested we let employees work from home two days a week. She must think no one should ever set foot in the office again — which would destroy everything about how our team works together.",
-    optionIds: ["false-dilemma", "straw-man", "valid", "appeal-to-authority"],
-    answerId: "straw-man",
-    explanation:
-      'The reply exaggerates a modest two-day proposal into "no one should ever come in," then attacks that invented extreme instead of the actual suggestion — the definition of a straw man.',
-  },
 
-  {
-    id: "q2-bridge-inspection",
-    statement:
-      "The bridge inspection found corrosion in three support beams. Structural engineers agree that corrosion of this kind reduces load capacity. Given that, the bridge should stay closed until repairs are finished.",
-    optionIds: ["valid", "ad-hominem", "slippery-slope", "straw-man"],
-    answerId: "valid",
-    explanation:
-      "Each step follows from evidence: a documented finding, an established engineering fact, and a conclusion that only combines them. No misdirection here — the reasoning holds.",
-  },
-
-  {
-    id: "q3-arts-budget",
-    statement:
-      "Either we cut the school's arts program completely, or the entire budget collapses next year — there's no other option on the table.",
-    optionIds: ["appeal-to-authority", "valid", "false-dilemma", "slippery-slope"],
-    answerId: "false-dilemma",
-    explanation:
-      'It skips every option between "cut everything" and "collapse" — trimming other line items, phasing cuts, raising funds — and presents only the two extremes as if they were the whole picture.',
-  },
-
-  {
-    id: "q4-exam-retakes",
-    statement:
-      "If we let students retake one exam, soon they'll expect to retake every exam, and eventually grades won't mean anything at all.",
-    optionIds: ["straw-man", "slippery-slope", "valid", "ad-hominem"],
-    answerId: "slippery-slope",
-    explanation:
-      "It predicts a runaway chain of consequences from one narrow policy change, without showing why retaking one exam must lead to retaking all of them.",
-  },
-
-  {
-    id: "q5-traffic-safety",
-    statement:
-      "Don't listen to her proposal on traffic safety — she got a speeding ticket last year, so nothing she says about road rules can be trusted.",
-    optionIds: ["false-dilemma", "appeal-to-authority", "valid", "ad-hominem"],
-    answerId: "ad-hominem",
-    explanation:
-      "It dismisses the proposal by attacking her driving record instead of examining whether the proposal itself would make roads safer.",
-  },
+/**
+ * The options every question offers, in the order they are shown.
+ *
+ * Exactly the categories the dataset uses. `slippery-slope` and
+ * `appeal-to-authority` exist in `TacticId` but are deliberately not offered:
+ * no item is ever keyed to them, so picking one could never be right and
+ * nothing in the bank explains why it was wrong.
+ *
+ * The order is fixed rather than varied per question, which is what keeps the
+ * answer key evenly spread. The dataset holds exactly ten items of each
+ * category, so a constant order puts the correct answer in each of the four
+ * slots exactly ten times — guessing a favourite position earns 25%, the same
+ * as guessing at random. Deriving a per-question order from a hash was tried
+ * and measured first: it skewed to 15/10/6/9, handing 37.5% to anyone who
+ * always picked the first option. A constant order also suits a drill set,
+ * where the options should be read once and the argument every time.
+ */
+const OPTION_IDS: [TacticId, TacticId, TacticId, TacticId] = [
+  "ad-hominem",
+  "straw-man",
+  "false-dilemma",
+  "valid",
 ];
+
+/**
+ * Dataset categories are snake_case and its own; `TacticId`s are kebab-case and
+ * ours. Keeping the vocabularies apart means a rename on either side stays a
+ * one-line change here rather than a hunt through the bank.
+ */
+const CATEGORY_TO_TACTIC: Record<string, TacticId> = {
+  ad_hominem: "ad-hominem",
+  strawman: "straw-man",
+  false_dilemma: "false-dilemma",
+  valid: "valid",
+};
+
+interface RawItem {
+  id: string;
+  category: string;
+  format: string;
+  prompt: string;
+  explanation: string;
+}
+
+function toQuestion(item: RawItem): Question {
+  const answerId = CATEGORY_TO_TACTIC[item.category];
+  // Fail at import rather than render a question with no right answer. A
+  // silently dropped item would leave a short round and no clue why.
+  if (!answerId) {
+    throw new Error(
+      `razor_quiz_dataset.json: item "${item.id}" has unknown category ` +
+        `"${item.category}". Add it to CATEGORY_TO_TACTIC in content/questions.ts.`,
+    );
+  }
+
+  return {
+    id: item.id,
+    // Dialogue items carry a speaker turn per line. `QuizScreen` preserves the
+    // breaks; collapsing them would lose track of who is answering whom, which
+    // is exactly what the reader has to follow.
+    statement: item.prompt,
+    optionIds: OPTION_IDS,
+    answerId,
+    explanation: item.explanation,
+  };
+}
+
+export const QUESTIONS: Question[] = (dataset.items as RawItem[]).map(toQuestion);
