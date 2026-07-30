@@ -28,8 +28,32 @@ The premise: the attention economy rewards outrage, and the people best at explo
 > disagree about the shipped surface, the design wins; treat the rest of this
 > document as product intent and backlog. Re-read the design before changing
 > the UI. See [DESIGN.md](DESIGN.md) for how it reaches the browser.
+>
+> **The mode picker and the free-text round are not in that file yet.** They
+> were built from the Classical primitives directly, and the design file needs
+> the new branch adding before it is the specification again. Until then it is
+> authoritative for the welcome screen and the MCQ round only.
 
-**Phase 2 and beyond.** Not committed. Likely directions: free-text rebuttal practice graded by Claude, user-pasted real-world content, progression and spaced repetition. **Do not build for these now** — but keep the seams clean (see [Architectural seams](#architectural-seams)).
+**Phase 2 (current).** A second way to answer the same five questions: instead
+of picking from four options, the learner writes what's going on in their own
+words and a grader marks it out of five, for a round total of twenty-five. The
+welcome screen is shared; a mode picker sits between it and the round.
+
+The grader is a seam with two implementations behind it, chosen by
+`GRADER_CONFIG.mode` in `lib/config.ts`:
+
+- `offline` (default) — `lib/mock-grader.ts`, a keyword grader scoring the same
+  three-part rubric. No key, no network, so the demo can't fail on either. It
+  understates by a mark rather than overstating; its limits are documented in
+  the module.
+- `claude` — `lib/evaluator.ts`, the real thing. Needs `ANTHROPIC_API_KEY`.
+
+Both are reached only through `lib/grader.ts` and only from `app/api/grade/`,
+so nothing about the key ever crosses the client boundary.
+
+**Phase 3 and beyond.** Not committed. Likely directions: user-pasted
+real-world content, progression and spaced repetition. **Do not build for these
+now** — but keep the seams clean (see [Architectural seams](#architectural-seams)).
 
 ## Relationship to the scaffold
 
@@ -40,7 +64,10 @@ Phase 1 is a quiz, not a chat, so:
 - **`app/page.tsx` gets replaced** by the quiz UI.
 - **Leave `lib/agent.ts` and `app/api/chat/` in place.** Phase 1 never calls them, and deleting them costs you the exact seam Phase 2 needs — LLM-graded rebuttals plug straight into `runAgent()`'s existing generator contract, streaming and abort handling included.
 
-Do not add Claude API calls in Phase 1. The content is static; a live demo shouldn't depend on a network round-trip or an API key.
+Nothing on a default run calls the Claude API. Quiz content is static and the
+grader defaults to `offline`, so a live demo never depends on a network round
+trip or an API key. Keep it that way: if you add a Claude call, put it behind a
+switch that is off by default and a stand-in that works without it.
 
 ## Stack & layout
 
@@ -51,24 +78,37 @@ Do not add Claude API calls in Phase 1. The content is static; a live demo shoul
 ```
 DESIGN.md               # how the Classical design system reaches the browser
 app/
-  page.tsx              # Phase 1: the quiz
+  page.tsx              # the route: welcome → mode picker → one of two rounds
   layout.tsx            # root layout — Cormorant/Lora fonts, flex-column shell
   globals.css           # Tailwind entry, Classical tokens, component layer
-  api/chat/route.ts     # streaming HTTP layer — unused in Phase 1, kept for Phase 2
+  api/chat/route.ts     # streaming HTTP layer — unused, kept for later
+  api/grade/route.ts    # POST a rebuttal, get an Evaluation back
 components/
-  quiz/                 # WelcomeScreen, QuizScreen, ResultsScreen,
-                        #   DefinitionDialog — one per branch of the design
+  quiz/                 # WelcomeScreen, ModeSelectScreen, QuizScreen,
+                        #   ResultsScreen, DefinitionDialog, ClassicFlow
+  rebuttal/             # RebuttalFlow, RebuttalScreen,
+                        #   RebuttalResultsScreen, ScoreMark
 content/
   tactics.ts            # the answer keys — names and definitions
   questions.ts          # the question bank
+  modes.ts              # copy for the mode picker and the free-text prompt
+  grading-cues.ts       # the offline grader's vocabulary — never rendered
 lib/
   types.ts              # shared types; chat Message types live here too
   content.ts            # the only door onto content/ — see Architectural seams
-  config.ts             # the design's three editor props, as configuration
-  agent.ts              # Claude calls — placeholder, untouched in Phase 1
-  quiz-machine.ts       # pure state transitions
-  scoring.ts            # pure scoring
+  config.ts             # the design's editor props, plus the grader switch
+  agent.ts              # Claude calls — placeholder, still untouched
+  grader.ts             # the only door onto grading; picks offline or claude
+  evaluator.ts          # the Claude grader — prompt, rubric, structured output
+  mock-grader.ts        # the offline grader — keyword scoring, no network
+  quiz-machine.ts       # pure state transitions, MCQ round
+  rebuttal-machine.ts   # pure state transitions, free-text round
+  scoring.ts            # pure scoring for both rounds
 ```
+
+Each round owns its own machine and its own flow component, and `app/page.tsx`
+owns only the route between them. Neither round knows the other exists — which
+is what keeps the MCQ path exactly as Phase 1 left it.
 
 There is no `components/ui/` yet. Classical's primitives arrive as global CSS
 classes (`.btn`, `.card`, `.tag`, `.input`) rather than React wrappers, so one

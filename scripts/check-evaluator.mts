@@ -21,6 +21,7 @@ if (!process.env.ANTHROPIC_API_KEY) {
 
 // Held out from the prompt: a different tactic, a different setting.
 const QUOTE = "Either we cut the arts budget completely, or this whole council goes bankrupt within a year.";
+const TACTIC_ID = "false-dilemma" as const;
 const TACTIC_NAME = "False dilemma";
 const TACTIC_EXPLANATION =
   "Presents two extreme options — total cut or bankruptcy — as if no middle ground exists, when partial reductions and other savings are obviously available.";
@@ -89,6 +90,7 @@ const results = await Promise.all(
     try {
       const evaluation = await evaluateRebuttal({
         quote: QUOTE,
+        tacticId: TACTIC_ID,
         tacticName: TACTIC_NAME,
         tacticExplanation: TACTIC_EXPLANATION,
         response: testCase.response,
