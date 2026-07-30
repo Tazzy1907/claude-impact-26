@@ -1,26 +1,584 @@
 @import "tailwindcss";
 
+/* ══════════════════════════════════════════════════════════════════════════
+   Classical — ported from the Claude Design project of the same name.
+   `styles.css` there is the upstream source of truth; see DESIGN.md for the
+   mapping and for what this port adds (a dark scheme, which upstream lacks).
+
+   Raw values are `--ds-*` and flip with the colour scheme. `@theme inline`
+   republishes them under Tailwind's own namespaces, which means one
+   declaration yields both the utility (`text-accent`) and the design
+   system's documented variable (`var(--color-accent)`) for hand-written CSS.
+   ══════════════════════════════════════════════════════════════════════ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ds-bg: #f3f2f2;
+  --ds-surface: #eae9e9;
+  --ds-text: #201f1d;
+  --ds-accent: #b68235;
+  --ds-accent-2: #ac803e;
+  --ds-divider: color-mix(in srgb, #201f1d 16%, transparent);
+
+  /* Tonal ramps — generated upstream in OKLCH on one shared lightness scale,
+     so the same step of any role matches the others in visual value. The
+     steps are *semantic*, not absolute: 100 is always the faintest tint on
+     the current ground and 900 the heaviest ink on it. The dark block below
+     therefore reverses them, which is what lets `.tag-accent` and friends
+     work in both schemes without a single `dark:` override. */
+  --ds-neutral-100: #f8f4f4;
+  --ds-neutral-200: #eae7e7;
+  --ds-neutral-300: #d7d3d3;
+  --ds-neutral-400: #bab6b6;
+  --ds-neutral-500: #9b9797;
+  --ds-neutral-600: #7d7979;
+  --ds-neutral-700: #605d5d;
+  --ds-neutral-800: #444141;
+  --ds-neutral-900: #2d2b2b;
+
+  --ds-accent-100: #fff3e4;
+  --ds-accent-200: #ffe3bf;
+  --ds-accent-300: #facb8d;
+  --ds-accent-400: #e1ad66;
+  --ds-accent-500: #c28d41;
+  --ds-accent-600: #a06f24;
+  --ds-accent-700: #7d5411;
+  --ds-accent-800: #5a3b0a;
+  --ds-accent-900: #3a270d;
+
+  --ds-accent-2-100: #fff3e4;
+  --ds-accent-2-200: #ffe3be;
+  --ds-accent-2-300: #f5cd96;
+  --ds-accent-2-400: #dbaf70;
+  --ds-accent-2-500: #bc8f4e;
+  --ds-accent-2-600: #9b7232;
+  --ds-accent-2-700: #79561f;
+  --ds-accent-2-800: #573d14;
+  --ds-accent-2-900: #382810;
+
+  /* The modal scrim is one of the few values that must NOT follow the ramp
+     reversal — a backdrop is dark on any ground, so it is pinned here. */
+  --ds-scrim: color-mix(in srgb, #2d2b2b 50%, transparent);
+
+  /* Elevation is a whisper here: ink-tinted and soft on the light ground. */
+  --ds-shadow-sm: 0 1px 2px color-mix(in srgb, #2d2b2b 14%, transparent);
+  --ds-shadow-md: 0 3px 10px color-mix(in srgb, #2d2b2b 16%, transparent);
+  --ds-shadow-lg: 0 12px 32px color-mix(in srgb, #2d2b2b 22%, transparent);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* Upstream Classical is a light-only system. This scheme is derived from it
+   rather than invented: the ground drops to the deep warm near-black the
+   readme reserves for colophon pages, the neutral and accent ramps reverse,
+   and the base accent moves one step lighter so it still clears 3:1. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --ds-bg: #1a1918;
+    --ds-surface: #252423;
+    --ds-text: #f3f2f2;
+    --ds-accent: #e1ad66;
+    --ds-accent-2: #dbaf70;
+    --ds-divider: color-mix(in srgb, #f3f2f2 16%, transparent);
+
+    --ds-neutral-100: #2d2b2b;
+    --ds-neutral-200: #444141;
+    --ds-neutral-300: #605d5d;
+    --ds-neutral-400: #7d7979;
+    --ds-neutral-500: #9b9797;
+    --ds-neutral-600: #bab6b6;
+    --ds-neutral-700: #d7d3d3;
+    --ds-neutral-800: #eae7e7;
+    --ds-neutral-900: #f8f4f4;
+
+    --ds-accent-100: #3a270d;
+    --ds-accent-200: #5a3b0a;
+    --ds-accent-300: #7d5411;
+    --ds-accent-400: #a06f24;
+    --ds-accent-500: #c28d41;
+    --ds-accent-600: #e1ad66;
+    --ds-accent-700: #facb8d;
+    --ds-accent-800: #ffe3bf;
+    --ds-accent-900: #fff3e4;
+
+    --ds-accent-2-100: #382810;
+    --ds-accent-2-200: #573d14;
+    --ds-accent-2-300: #79561f;
+    --ds-accent-2-400: #9b7232;
+    --ds-accent-2-500: #bc8f4e;
+    --ds-accent-2-600: #dbaf70;
+    --ds-accent-2-700: #f5cd96;
+    --ds-accent-2-800: #ffe3be;
+    --ds-accent-2-900: #fff3e4;
+
+    --ds-scrim: rgb(0 0 0 / 0.65);
+
+    /* On a dark ground a soft ink shadow is invisible; the hairline carries
+       the edge and the shadow only deepens the ambient separation. */
+    --ds-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.45);
+    --ds-shadow-md: 0 3px 10px rgb(0 0 0 / 0.5);
+    --ds-shadow-lg: 0 12px 32px rgb(0 0 0 / 0.6);
   }
 }
 
+@theme inline {
+  --color-bg: var(--ds-bg);
+  --color-surface: var(--ds-surface);
+  --color-text: var(--ds-text);
+  --color-accent: var(--ds-accent);
+  --color-accent-2: var(--ds-accent-2);
+  --color-divider: var(--ds-divider);
+  --color-scrim: var(--ds-scrim);
+
+  --color-neutral-100: var(--ds-neutral-100);
+  --color-neutral-200: var(--ds-neutral-200);
+  --color-neutral-300: var(--ds-neutral-300);
+  --color-neutral-400: var(--ds-neutral-400);
+  --color-neutral-500: var(--ds-neutral-500);
+  --color-neutral-600: var(--ds-neutral-600);
+  --color-neutral-700: var(--ds-neutral-700);
+  --color-neutral-800: var(--ds-neutral-800);
+  --color-neutral-900: var(--ds-neutral-900);
+
+  --color-accent-100: var(--ds-accent-100);
+  --color-accent-200: var(--ds-accent-200);
+  --color-accent-300: var(--ds-accent-300);
+  --color-accent-400: var(--ds-accent-400);
+  --color-accent-500: var(--ds-accent-500);
+  --color-accent-600: var(--ds-accent-600);
+  --color-accent-700: var(--ds-accent-700);
+  --color-accent-800: var(--ds-accent-800);
+  --color-accent-900: var(--ds-accent-900);
+
+  --color-accent-2-100: var(--ds-accent-2-100);
+  --color-accent-2-200: var(--ds-accent-2-200);
+  --color-accent-2-300: var(--ds-accent-2-300);
+  --color-accent-2-400: var(--ds-accent-2-400);
+  --color-accent-2-500: var(--ds-accent-2-500);
+  --color-accent-2-600: var(--ds-accent-2-600);
+  --color-accent-2-700: var(--ds-accent-2-700);
+  --color-accent-2-800: var(--ds-accent-2-800);
+  --color-accent-2-900: var(--ds-accent-2-900);
+
+  --shadow-sm: var(--ds-shadow-sm);
+  --shadow-md: var(--ds-shadow-md);
+  --shadow-lg: var(--ds-shadow-lg);
+
+  --font-heading: var(--font-cormorant), Georgia, serif;
+  --font-body: var(--font-lora), Georgia, serif;
+}
+
+@theme {
+  /* Density 1.15 — Tailwind derives every numeric spacing utility from this
+     one multiplier, so 0.25rem × 1.15 reproduces Classical's whole
+     --space-* scale exactly: p-1 = 4.6px, p-4 = 18.4px, p-8 = 36.8px. */
+  --spacing: 0.2875rem;
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 7px;
+}
+
+/* The upstream `--space-*` and `--font-heading-weight` names, republished so
+   the component layer below reads the way the design system documents it. */
+:root {
+  --space-1: 4.6px;
+  --space-2: 9.2px;
+  --space-3: 13.8px;
+  --space-4: 18.4px;
+  --space-6: 27.6px;
+  --space-8: 36.8px;
+  --font-heading-weight: 600;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Base type — Cormorant Garamond headings over Lora body. Bold is avoided:
+   semibold is the ceiling for interface headings, and display sizes set
+   lighter still.
+   ══════════════════════════════════════════════════════════════════════ */
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  font-weight: 400;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  margin: 0 0 var(--space-2);
+}
+h1 { font-size: 42px; }
+h2 { font-size: 32px; }
+h3 { font-size: 25px; }
+h4 { font-size: 20px; }
+h5 { font-size: 16px; }
+h6 { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+p { margin: 0 0 var(--space-3); }
+a { color: var(--color-accent); text-underline-offset: 3px; }
+
+/* Figures set tabular so they line up as columns; running prose keeps its
+   text figures, since Lora's tabular feature also widens its word-spaces. */
+.tnum { font-variant-numeric: tabular-nums; }
+
+.text-muted { color: color-mix(in srgb, var(--color-text) 55%, transparent); }
+
+/* Themed interaction states, never browser defaults. */
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+::selection { background: color-mix(in srgb, var(--color-accent) 30%, transparent); }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Component layer — ported class-for-class from Classical's styles.css so
+   this markup stays interchangeable with the design system's own pages.
+   Colour is applied as stroke, never fill.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.hr {
+  height: 1px;
+  border: 0;
+  margin: var(--space-4) 0;
+  background: var(--color-divider);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 14px;
+  line-height: 1.2;
+  color: var(--color-text);
+  background: transparent;
+  border: 1px solid transparent;
+  padding: var(--space-2) calc(var(--space-3) * 1.2);
+  border-radius: var(--radius-md);
+}
+.btn svg { display: block; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary { color: var(--color-accent); border-color: var(--color-accent); }
+.btn-primary:hover:not(:disabled) { background: color-mix(in srgb, var(--color-accent) 12%, transparent); }
+.btn-primary:active:not(:disabled) { background: color-mix(in srgb, var(--color-accent) 22%, transparent); }
+.btn-secondary { border-color: var(--color-divider); }
+.btn-secondary:hover:not(:disabled) { background: color-mix(in srgb, var(--color-text) 7%, transparent); }
+.btn-secondary:active:not(:disabled) { background: color-mix(in srgb, var(--color-text) 14%, transparent); }
+.btn-ghost { color: var(--color-accent); padding-inline: var(--space-1); }
+.btn-ghost:hover:not(:disabled) { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
+.btn-ghost:active:not(:disabled) { background: color-mix(in srgb, var(--color-accent) 18%, transparent); }
+.btn-icon { width: 36px; height: 36px; padding: 0; }
+.btn-block { width: 100%; margin-top: var(--space-2); }
+
+/* Forms are unused in Phase 1 but ported whole: Phase 2's free-text rebuttal
+   lands on `textarea.input`, and a partial port is how systems drift. */
+.field > label {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 5px;
+  color: color-mix(in srgb, var(--color-text) 70%, transparent);
+}
+.input {
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--color-text);
+  caret-color: var(--color-accent);
+  background: transparent;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+}
+.input:hover { border-color: color-mix(in srgb, var(--color-text) 45%, transparent); }
+.input:focus-visible { border-color: var(--color-accent); outline-offset: 0; }
+textarea.input { min-height: 90px; resize: vertical; }
+
+.radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.radio input,
+.seg-opt input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.radio .dot {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-divider);
+}
+.radio:hover .dot { border-color: var(--color-accent); }
+.radio input:checked + .dot {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  box-shadow: inset 0 0 0 4px var(--color-bg);
+}
+.radio input:focus-visible + .dot { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+.seg {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+}
+.seg-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.seg-opt + .seg-opt { border-left: 1px solid var(--color-divider); }
+.seg-opt:has(input:checked) { color: var(--color-accent); box-shadow: inset 0 0 0 1px var(--color-accent); }
+.seg-opt:not(:has(input:checked)):hover { background: color-mix(in srgb, var(--color-text) 7%, transparent); }
+.seg-opt:has(input:focus-visible) { outline: 2px solid var(--color-accent); outline-offset: -2px; }
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: 1px solid var(--color-divider);
+}
+.card-kicker {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.card-title {
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 17px;
+  line-height: 1.2;
+}
+.card-body { margin: 0; font-size: 13px; opacity: 0.8; flex: 1; }
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: color-mix(in srgb, var(--color-text) 50%, transparent);
+}
+.elev-sm { box-shadow: var(--shadow-sm); }
+.elev-md { box-shadow: var(--shadow-md); }
+.elev-lg { box-shadow: var(--shadow-lg); }
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  padding: 3px 10px;
+  border-radius: calc(var(--radius-md) * 0.75);
+}
+.tag-accent { background: var(--color-accent-100); color: var(--color-accent-800); }
+.tag-accent-2 { background: var(--color-accent-2-100); color: var(--color-accent-2-800); }
+.tag-neutral { background: var(--color-neutral-100); color: var(--color-neutral-800); }
+.tag-outline { border: 1px solid var(--color-accent); color: var(--color-accent); }
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-divider);
+}
+.nav-brand {
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 18px;
+  margin-right: auto;
+}
+.nav a { color: inherit; text-decoration: none; font-size: 14px; }
+.nav a:hover,
+.nav a[aria-current="page"] { color: var(--color-accent); }
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: var(--color-scrim);
+}
+.dialog {
+  width: min(440px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-divider);
+}
+.dialog-title {
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 20px;
+}
+.dialog-body { font-size: 14px; opacity: 0.85; }
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Application layer — patterns this product needs that Classical does not
+   define. Built only from its tokens and following its rules (stroke over
+   fill, hairline structure, elevation as a whisper), so they sit alongside
+   the ported layer without arguing with it. Candidates to push upstream.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* The quote under examination. Display sizes take the normal cut, not the
+   semibold interface weight — the biggest text sets lightest. */
+.quote {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 1.28;
+  letter-spacing: -0.015em;
+  margin: 0;
+  padding-left: var(--space-4);
+  border-left: 1px solid var(--color-accent);
+}
+@media (min-width: 640px) {
+  .quote { font-size: 30px; }
+}
+
+/* An answer option. An outlined control like `.btn`, sized for two lines of
+   text and left-aligned, since these are statements rather than actions. */
+.option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 16px;
+  line-height: 1.25;
+  color: var(--color-text);
+  background: transparent;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+}
+.option:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 7%, transparent);
+}
+.option:active:not(:disabled) { background: color-mix(in srgb, var(--color-accent) 14%, transparent); }
+.option:disabled { cursor: default; }
+
+/* Reveal states. Correctness is never carried by colour alone — each of
+   these pairs with an icon and a word in the markup. */
+.option-answer {
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+/* The wrong pick. Deliberately not red: a heavier hairline and a label, so
+   it reads as "not this one", not as a penalty. */
+.option-missed {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--color-text) 45%, transparent);
+}
+.option-dimmed { opacity: 0.55; }
+
+.option-mark { flex: none; color: var(--color-accent); }
+.option-label {
+  margin-left: auto;
+  flex: none;
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-text) 60%, transparent);
+}
+
+/* Definition rail — holds the shortDef of whichever option is hovered,
+   focused or pinned. A reserved block rather than a floating popover, so
+   nothing reflows as the pointer moves down the list. */
+.def-rail {
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-top: 1px solid var(--color-divider);
+  border-bottom: 1px solid var(--color-divider);
+  font-size: 13px;
+}
+
+/* Progress. A hairline that fills — the structure of the page is rules, so
+   the progress indicator is one too. */
+.progress {
+  height: 1px;
+  width: 100%;
+  background: var(--color-divider);
+}
+.progress-fill {
+  height: 100%;
+  background: var(--color-accent);
+  transition: width 200ms ease-out;
+}
+
+/* The teaching panel after an answer. Tinted a single step off the ground —
+   the one place a fill is allowed, because it has to read as a distinct
+   register from the question above it. */
+.reveal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.reveal-heading {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+  margin-bottom: 3px;
+}
+/* The sentence you could actually say back — the payload of the whole
+   screen, so it gets the accent rule and the body face at reading size. */
+.rebuttal {
+  font-size: 15px;
+  line-height: 1.5;
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--color-accent);
 }
