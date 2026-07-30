@@ -129,21 +129,25 @@ interchangeable with the design system's own pages:
 The forms classes are unused in Phase 1 and ported anyway: Phase 2's free-text
 rebuttal lands on `textarea.input`, and a partial port is how systems drift.
 
-**Application layer** — patterns this product needs that Classical doesn't
-define. Built only from its tokens and obeying its rules, so they sit
-alongside the ported layer without arguing with it:
+**Application layer** — the handful of patterns `Mindshield.dc.html` builds
+with inline styles rather than classes. Values are transcribed from that file
+rather than re-derived, so the rendered result matches it exactly:
 
 | Class | What it is |
 |---|---|
-| `.quote` | The quote under examination — display type at the normal cut against an accent hairline |
-| `.option`, `.option-answer`, `.option-missed`, `.option-dimmed`, `.option-mark`, `.option-label` | An answer option and its reveal states |
-| `.def-rail` | Reserved block holding the definition of whichever option is hovered, focused or pinned |
-| `.progress`, `.progress-fill` | Progress as a filling hairline, since the page's structure is rules |
-| `.reveal`, `.reveal-heading` | The teaching panel after an answer |
-| `.rebuttal` | The sentence you could say back — the payload of the screen |
+| `.option-row` + `-selected`, `-correct`, `-wrong` | An answer row and its pre- and post-submit states |
+| `.progress-track`, `.progress-bar` | The 4px filling bar above the question |
+| `.step-index` | The 01/02/03 numerals on the welcome screen |
+| `.score-figure` | The 56px results figure, set at the normal cut |
+| `.summary-chip` + `-correct`, `-wrong` | Compact per-question chips, used when `reviewDetail` is `summary` |
+| `.fade-in` | The feedback card's entrance, neutralised by the reduced-motion block |
 | `.tnum` | Tabular figures for anything that stands as a figure or a column |
 
 These are the candidates to push back upstream into Classical.
+
+One deliberate exception to the token rule: `.option-row` keeps the design's
+literal `padding: 12px 14px`. The nearest token, `--space-3`, is 13.8px, and
+fidelity to the design file wins over token purity where the two disagree.
 
 ## Rules for new UI
 
@@ -168,18 +172,21 @@ From Classical, and they are not negotiable if the app is to stay coherent:
 Not a later phase. Every one of these is load-bearing in a learning tool:
 
 - **Definitions before committing.** Most people won't know all four terms, so
-  a definition is reachable three ways — hover, keyboard focus, and a tap
-  target that pins it open. Screen readers don't depend on any of that: each
-  option carries its own definition via `aria-describedby`.
-- **Correctness is never colour alone.** Every reveal state pairs a stroke
-  treatment with a Lucide icon *and* a word ("The tactic", "Your pick").
+  every fallacy option carries a "What does this mean?" button that opens the
+  definition dialog *before* an answer is locked in. `Valid argument` is the
+  one option without it — there is no trick to look up.
+- **Correctness is never colour alone.** Each marked row pairs a stroke
+  treatment with a Lucide icon *and* a word ("Correct answer", "Your answer").
+  The results review, where the icon would otherwise stand alone, carries an
+  `sr-only` "Correct." / "Incorrect." beside it.
 - **No harsh red.** Getting it wrong is the most useful moment in the app, so
-  a missed pick gets a dashed hairline and a label, not a penalty colour.
+  a missed pick gets a dashed neutral border and a label, not a penalty colour.
 - **Focus is unmistakable.** `:focus-visible` is a 2px accent ring at 2px
-  offset, set globally. Never `outline: none` without a replacement at least
-  as visible.
-- **Focus moves with the user.** Advancing a question sends focus to the top
-  of the new one, so a keyboard user doesn't restart from the header.
+  offset, set globally. The design's radios hide the native input and style
+  `.dot`, so focus is carried by `.radio input:focus-visible + .dot`.
+- **The dialog is a real dialog.** It takes focus on open, traps Tab, closes on
+  Escape or backdrop click, and returns focus to the button that opened it.
+  This is the one place the port adds behaviour the design only implies.
 - Both colour schemes are verified before a component is called done.
 
 ## Re-syncing with Claude Design

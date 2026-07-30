@@ -21,9 +21,9 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
-  title: "Name the Tactic",
+  title: "Mindshield",
   description:
-    "Practise recognising the manipulation tactics and logical fallacies used in everyday persuasive speech.",
+    "Five short arguments. Some are sound; some lean on a rhetorical trick. Read each one, name what's happening, and see why.",
 };
 
 export default function RootLayout({
