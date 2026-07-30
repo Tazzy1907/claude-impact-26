@@ -1,0 +1,296 @@
+{
+  "meta": {
+    "name": "Razor Mini — Rapid Reasoning Drill Set",
+    "version": "1.1",
+    "categories": [
+      "ad_hominem",
+      "strawman",
+      "false_dilemma",
+      "valid"
+    ],
+    "count": 40,
+    "notes": "Tu quoque / hypocrisy items are filed under ad_hominem for this build. 'valid' items are deliberately designed to resemble one of the three fallacies so players cannot pass on vibes alone."
+  },
+  "items": [
+    {
+      "id": "ah_01",
+      "category": "ad_hominem",
+      "format": "dialogue",
+      "prompt": "Person A: \"The data shows the new traffic scheme cut accidents by 20% in its first year.\"\nPerson B: \"You've never even owned a car. Why would anyone listen to you about roads?\"",
+      "explanation": "B never touches the accident data. Whether A drives is irrelevant to whether the statistic is accurate — the attack targets A's standing, not A's claim."
+    },
+    {
+      "id": "ah_02",
+      "category": "ad_hominem",
+      "format": "single",
+      "prompt": "Of course she thinks the wealth tax is a good idea — she's a trust fund kid who's never worked a day in her life.",
+      "explanation": "Her background is offered as a substitute for engaging with the argument. Even if the biography is accurate, it tells you nothing about whether the tax policy works."
+    },
+    {
+      "id": "ah_03",
+      "category": "ad_hominem",
+      "format": "dialogue",
+      "prompt": "Person A: \"I've read the report and I think the budget forecast is too optimistic.\"\nPerson B: \"Mate, you failed A-level maths. Sit down.\"",
+      "explanation": "A past exam result is used to disqualify A from speaking. The forecast is either too optimistic or it isn't — that's settled by checking the numbers, not A's transcript."
+    },
+    {
+      "id": "ah_04",
+      "category": "ad_hominem",
+      "format": "dialogue",
+      "prompt": "Person A: \"You really shouldn't drive after two pints.\"\nPerson B: \"You drove home from Jake's party last summer. Don't lecture me.\"",
+      "explanation": "Tu quoque — the 'you too' variant. A's own past behaviour might make A a hypocrite, but it does nothing to make drink-driving safe."
+    },
+    {
+      "id": "ah_05",
+      "category": "ad_hominem",
+      "format": "single",
+      "prompt": "This nutrition advice comes from a guy who's visibly overweight, so it's obviously nonsense.",
+      "explanation": "The speaker's body is treated as a refutation. Advice can be sound whether or not the person giving it follows it — the evidence behind the advice is the only thing that settles it."
+    },
+    {
+      "id": "ah_06",
+      "category": "ad_hominem",
+      "format": "dialogue",
+      "prompt": "Person A: \"The council's housing plan won't hit its targets — here's the shortfall in the numbers.\"\nPerson B: \"Funny how you only started caring about housing once you decided to run for office.\"",
+      "explanation": "Circumstantial ad hominem: B attacks A's motive rather than the shortfall. A self-interested person can still be pointing at a real gap in the plan."
+    },
+    {
+      "id": "ah_07",
+      "category": "ad_hominem",
+      "format": "single",
+      "prompt": "My doctor told me to quit smoking, but I saw her smoking outside the clinic — so clearly it can't be that dangerous.",
+      "explanation": "Tu quoque. The doctor's inconsistency is real, but the health risk of smoking is established by the research, not by whether she personally complies with it."
+    },
+    {
+      "id": "ah_09",
+      "category": "ad_hominem",
+      "format": "single",
+      "prompt": "You can't trust a word he says about climate policy — the man's been divorced twice and can't even keep his own life together.",
+      "explanation": "Personal life is dragged in as though it bears on policy analysis. There's no route from marital history to the merits of a carbon pricing argument."
+    },
+    {
+      "id": "ah_11",
+      "category": "ad_hominem",
+      "format": "single",
+      "prompt": "The lead author of that study is a vegan, so obviously the findings on red meat are rubbish.",
+      "explanation": "The author's diet is used to bin the result outright. Noting a possible bias is fair as a reason to check the methodology — using it as the whole rebuttal is the fallacy."
+    },
+    {
+      "id": "ah_13",
+      "category": "ad_hominem",
+      "format": "single",
+      "prompt": "Environmentalists lecture us about flying less and then jet off to conferences — so the whole climate thing is clearly overblown.",
+      "explanation": "Tu quoque aimed at a group. Inconsistent advocates are a fair target for criticism, but atmospheric physics doesn't depend on their travel habits."
+    },
+    {
+      "id": "sm_01",
+      "category": "strawman",
+      "format": "dialogue",
+      "prompt": "Person A: \"I think we could trim the defence budget by a couple of percent.\"\nPerson B: \"So you'd rather we had no army at all and just hoped nobody invaded?\"",
+      "explanation": "A modest trim is inflated into total abolition, and B then attacks the inflated version. The position actually on the table was never addressed."
+    },
+    {
+      "id": "sm_03",
+      "category": "strawman",
+      "format": "single",
+      "prompt": "The people asking for bike lanes basically want to make driving illegal.",
+      "explanation": "A request to accommodate cyclists is restated as prohibiting drivers. The distortion turns a shared-space argument into an attack on car owners."
+    },
+    {
+      "id": "sm_04",
+      "category": "strawman",
+      "format": "dialogue",
+      "prompt": "Person A: \"I don't think this candidate is our strongest option.\"\nPerson B: \"So you're happy for the other lot to win. Great. Thanks a lot.\"",
+      "explanation": "Criticism of one candidate is recast as support for the opposition. A's actual view — that a better option exists — vanishes from the exchange."
+    },
+    {
+      "id": "sm_05",
+      "category": "strawman",
+      "format": "dialogue",
+      "prompt": "Person A: \"I'd like us to do a bit more code review before merging to main.\"\nPerson B: \"Right, so you want to slow the whole team to a crawl and ship absolutely nothing.\"",
+      "explanation": "'More review' becomes 'ship nothing', an absurd endpoint nobody proposed. Attacking that endpoint leaves the real suggestion untouched."
+    },
+    {
+      "id": "sm_06",
+      "category": "strawman",
+      "format": "single",
+      "prompt": "Anyone who supports remote work is really just saying they don't want to work at all.",
+      "explanation": "A claim about where work happens is reframed as a claim about whether work happens. The substitute position is trivially easy to dismiss."
+    },
+    {
+      "id": "sm_07",
+      "category": "strawman",
+      "format": "dialogue",
+      "prompt": "Person A: \"I think the tipping system is unfair to servers.\"\nPerson B: \"So you think servers should just work for free, then?\"",
+      "explanation": "B inverts the position entirely — A's complaint is that servers are underpaid, and B attacks a view that would pay them nothing."
+    },
+    {
+      "id": "sm_08",
+      "category": "strawman",
+      "format": "dialogue",
+      "prompt": "Person A: \"Consent should be part of the secondary school curriculum.\"\nPerson B: \"You want to expose children to explicit sexual content in a classroom.\"",
+      "explanation": "The proposal is relabelled with the most lurid framing available. B fights that framing rather than the age-appropriate curriculum A described."
+    },
+    {
+      "id": "sm_12",
+      "category": "strawman",
+      "format": "single",
+      "prompt": "So because I forgot one anniversary, apparently I'm a terrible partner who has never done a single thing for you.",
+      "explanation": "A specific complaint is escalated into a sweeping condemnation, which is then rejected as unfair. The original grievance never gets answered."
+    },
+    {
+      "id": "sm_14",
+      "category": "strawman",
+      "format": "dialogue",
+      "prompt": "Person A: \"Vaccine side effects should be monitored and reported transparently.\"\nPerson B: \"So you're an anti-vaxxer.\"",
+      "explanation": "A mainstream position on pharmacovigilance is swapped for a fringe label. The label is easier to attack than the actual point about transparency."
+    },
+    {
+      "id": "sm_15",
+      "category": "strawman",
+      "format": "single",
+      "prompt": "People calling for police reform are saying they want zero consequences for anyone who commits a crime.",
+      "explanation": "'Reform' is redefined as 'no consequences' — a position almost nobody holds. The redefinition does the argumentative work that evidence should be doing."
+    },
+    {
+      "id": "fd_01",
+      "category": "false_dilemma",
+      "format": "single",
+      "prompt": "You're either with us on this restructure, or you're against the company's future. Simple as that.",
+      "explanation": "Two options are presented as the only ones available. Supporting the company while opposing this particular restructure is an obvious third position the framing hides."
+    },
+    {
+      "id": "fd_02",
+      "category": "false_dilemma",
+      "format": "dialogue",
+      "prompt": "Person A: \"I've got some concerns about the merger timeline.\"\nPerson B: \"So do you want the merger or not? Yes or no.\"",
+      "explanation": "A nuanced position is forced into a binary that can't contain it. 'Yes, but later' and 'yes, with conditions' are both ruled out by the framing rather than by argument."
+    },
+    {
+      "id": "fd_03",
+      "category": "false_dilemma",
+      "format": "single",
+      "prompt": "We can have a strong economy or a clean environment. There is no third road.",
+      "explanation": "The two goals are asserted to be mutually exclusive with no middle ground. Policies that trade off partially, or serve both, are excluded by assertion alone."
+    },
+    {
+      "id": "fd_04",
+      "category": "false_dilemma",
+      "format": "dialogue",
+      "prompt": "Person A: \"I'd rather skip the party tonight, I'm exhausted.\"\nPerson B: \"Fine. So either you come out tonight, or you admit you don't actually care about this friendship.\"",
+      "explanation": "Attendance and affection are welded into a single binary. Being tired and being a good friend are entirely compatible — the dilemma is manufactured for leverage."
+    },
+    {
+      "id": "fd_06",
+      "category": "false_dilemma",
+      "format": "dialogue",
+      "prompt": "Person A: \"The council has to choose: fund the new library, or repair the roads.\"\nPerson B: \"The library, I suppose.\"",
+      "explanation": "A budget with many possible allocations is presented as a straight choice between two items. Partial funding, phasing, or other savings are never put on the table."
+    },
+    {
+      "id": "fd_07",
+      "category": "false_dilemma",
+      "format": "single",
+      "prompt": "Either you go to university, or you throw your future away.",
+      "explanation": "Apprenticeships, trades, employment and starting later are all erased. The choice looks forced only because the alternatives were left out."
+    },
+    {
+      "id": "fd_08",
+      "category": "false_dilemma",
+      "format": "dialogue",
+      "prompt": "Person A: \"I don't think banning the app outright is the right move.\"\nPerson B: \"So you'd let a hostile government harvest every citizen's data? Choose.\"",
+      "explanation": "The options are reduced to total ban or total inaction. Data localisation, audits and disclosure rules sit between them and are silently dropped."
+    },
+    {
+      "id": "fd_10",
+      "category": "false_dilemma",
+      "format": "dialogue",
+      "prompt": "Person A: \"This module needs refactoring before we pile more features on it.\"\nPerson B: \"We can refactor or we can hit the deadline. Which is it?\"",
+      "explanation": "The framing assumes refactoring is all-or-nothing. Partial cleanup, cutting scope, or refactoring the one hot path are all available and unmentioned."
+    },
+    {
+      "id": "fd_13",
+      "category": "false_dilemma",
+      "format": "single",
+      "prompt": "You either accept the science completely or you're a denier.",
+      "explanation": "Scientific findings vary in how well established they are, and questioning one result is not rejecting a field. The binary leaves no room for calibrated confidence."
+    },
+    {
+      "id": "fd_15",
+      "category": "false_dilemma",
+      "format": "single",
+      "prompt": "We can protect free speech, or we can moderate harmful content. Choose one.",
+      "explanation": "There is a real tension here, but presenting it as a strict either/or is still the fallacy. Narrow, transparent, appealable moderation rules are a live third option the framing forecloses."
+    },
+    {
+      "id": "vl_01",
+      "category": "valid",
+      "format": "dialogue",
+      "prompt": "Person A: \"Trust me, this supplement is clinically proven to work.\"\nPerson B: \"You're paid by the company that makes it and you haven't shown me the trial. That's a reason for me to want independent evidence before I accept it.\"",
+      "explanation": "Looks like ad hominem, but isn't. B doesn't conclude the supplement fails — B identifies a real reason A's testimony is unreliable and asks for evidence instead. Questioning a source's credibility is legitimate when the claim rests on that source's word."
+    },
+    {
+      "id": "vl_02",
+      "category": "valid",
+      "format": "dialogue",
+      "prompt": "Person A: \"Nobody should need a licence to own any weapon at all.\"\nPerson B: \"So your position is no licensing whatsoever, including automatic weapons?\"\nPerson A: \"Correct.\"",
+      "explanation": "Looks like a strawman, but isn't. B restates the position in its strongest and most literal form and checks it — and A confirms. Accurately describing an extreme view that someone actually holds is not distortion."
+    },
+    {
+      "id": "vl_03",
+      "category": "valid",
+      "format": "single",
+      "prompt": "The bill either passes tonight's vote or it doesn't. There's no third outcome on the order paper.",
+      "explanation": "Looks like a false dilemma, but the binary is genuinely exhaustive. A dilemma is only a fallacy when real options have been left out; here the two branches cover every possibility."
+    },
+    {
+      "id": "vl_05",
+      "category": "valid",
+      "format": "dialogue",
+      "prompt": "Person A: \"I'm not convinced this bridge design is safe.\"\nPerson B: \"What's your reasoning? The load calculations are in section four — which figure do you think is wrong?\"",
+      "explanation": "B could have gone after A's credentials and instead goes after the argument, asking for the specific point of disagreement. This is what engaging with a claim looks like rather than dismissing the person making it."
+    },
+    {
+      "id": "vl_06",
+      "category": "valid",
+      "format": "single",
+      "prompt": "Three separate studies using different methods found the same effect, and none has found the opposite. That's decent — though not conclusive — reason to think the effect is real.",
+      "explanation": "The strength of the conclusion is matched to the strength of the evidence. Independent replication supports the claim, and the hedge is stated rather than glossed over."
+    },
+    {
+      "id": "vl_08",
+      "category": "valid",
+      "format": "single",
+      "prompt": "We have one engineer and two weeks, so we can ship payments or notifications this sprint, not both. Either one could go into next sprint instead.",
+      "explanation": "Looks like a false dilemma, but it's a real constraint honestly stated — and it explicitly leaves the third option open. The exclusivity comes from the actual resource limit, not from the framing."
+    },
+    {
+      "id": "vl_09",
+      "category": "valid",
+      "format": "dialogue",
+      "prompt": "Person A: \"Immigration has no effect on wages whatsoever.\"\nPerson B: \"That's a strong claim. The literature is mixed, with small negative effects in some low-wage sectors. Which studies are you relying on?\"",
+      "explanation": "B challenges an absolute claim by citing the state of the evidence and asking for A's basis. The position isn't exaggerated and A isn't attacked — the claim itself is put under pressure."
+    },
+    {
+      "id": "vl_11",
+      "category": "valid",
+      "format": "single",
+      "prompt": "You said the shop is closed on Sundays, but I bought bread there last Sunday afternoon. So it isn't.",
+      "explanation": "A universal claim is refuted by a single clear counterexample. The reasoning goes straight at the content of the claim and one instance is logically enough to sink it."
+    },
+    {
+      "id": "vl_12",
+      "category": "valid",
+      "format": "single",
+      "prompt": "If the server had gone down, the monitoring alerts would have fired. No alerts fired. So the server didn't go down.",
+      "explanation": "Valid conditional reasoning — deny the consequent, deny the antecedent. It depends on the monitoring being reliable, but that premise is stated rather than hidden."
+    },
+    {
+      "id": "vl_15",
+      "category": "valid",
+      "format": "dialogue",
+      "prompt": "Person A: \"Your cost estimate left out ongoing maintenance.\"\nPerson B: \"You're right, it did. Adding maintenance takes the total to £1.2m, which changes my conclusion.\"",
+      "explanation": "A specific, relevant objection is met by checking it and updating. No distortion, no counterattack, no forced binary — this is what the honest version of the exchange looks like."
+    }
+  ]
+}

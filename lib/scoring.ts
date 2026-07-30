@@ -7,6 +7,9 @@ import type { AnswerRecord, QuizState, TacticFamily, TacticId } from "@/lib/type
  * The summary exists to tell someone what to practise next, not to rank them.
  * That's why `missedTactics` is the part that matters and the headline
  * fraction is deliberately undramatic.
+ *
+ * `RoundScore` rather than `Score` deliberately: `Score` in `lib/types.ts` is
+ * the 0-5 rubric grade for a single rebuttal, which is a different thing.
  */
 
 export interface FamilyBreakdown {
@@ -15,7 +18,7 @@ export interface FamilyBreakdown {
   total: number;
 }
 
-export interface Score {
+export interface RoundScore {
   correct: number;
   total: number;
   /** 0-100, rounded. `0` for an empty round rather than NaN. */
@@ -31,7 +34,7 @@ const FAMILY_ORDER: TacticFamily[] = [
   "rhetorical-trick",
 ];
 
-export function scoreRound(state: QuizState): Score {
+export function scoreRound(state: QuizState): RoundScore {
   const { answers } = state;
   const correct = answers.filter((a) => a.correct).length;
   const total = answers.length;
@@ -59,7 +62,7 @@ export function scoreRound(state: QuizState): Score {
  * A closing line. Phrased around what to do next rather than how well they
  * did — the product's job is to leave someone equipped, not graded.
  */
-export function verdict(score: Score): string {
+export function verdict(score: RoundScore): string {
   if (score.total === 0) return "Nothing answered yet.";
   if (score.correct === score.total) {
     return "Every one named correctly. Try a fresh round — the harder questions turn up in a different order.";

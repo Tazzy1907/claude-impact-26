@@ -1,10 +1,10 @@
 import { RotateCcw } from "lucide-react";
 import { FAMILY_LABELS } from "@/content/tactics";
 import { getTactic } from "@/lib/content";
-import { verdict, type Score } from "@/lib/scoring";
+import { verdict, type RoundScore } from "@/lib/scoring";
 
 interface RoundSummaryProps {
-  score: Score;
+  score: RoundScore;
   onRestart: () => void;
 }
 
