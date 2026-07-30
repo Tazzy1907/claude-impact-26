@@ -1,93 +1,126 @@
+import Anthropic from "@anthropic-ai/sdk";
 import type { Message } from "./types";
 
 /**
- * ============================================================================
- *                         THIS IS WHERE THE AGENT GOES
- * ============================================================================
+ * Server-side Claude access. Never import this into a `"use client"` file —
+ * it reads the API key.
  *
- * `runAgent` is the ONLY function you need to implement. Everything around it
- * already works: the API route wraps this generator in an HTTP stream, and the
- * UI renders each chunk as it arrives.
+ * `runAgent` keeps the generator contract the scaffold established, so the
+ * route handler, streaming, and abort handling work unchanged.
+ */
+
+/**
+ * Exact model ID — no date suffix. Opus 5 has extended thinking ON by default.
+ */
+const MODEL = "claude-opus-5";
+
+/**
+ * `max_tokens` caps thinking AND visible text together, so a tight value
+ * truncates answers mid-sentence. It's a ceiling, not a reservation — you're
+ * billed for what's actually produced, so keeping it generous is free.
+ */
+const MAX_TOKENS = 32_000;
+
+const SYSTEM_PROMPT = `You are the reasoning engine for a tool that teaches people to recognise \
+manipulation tactics and logical fallacies in persuasive speech.
+
+Analyse the form of an argument, never who is right about the underlying topic. \
+Stay politically neutral. Critique the tactic, not the character of the speaker.
+
+Be concrete: quote the specific words that constitute a tactic rather than \
+describing it abstractly. Prefer plain language a person could say out loud over \
+textbook phrasing. Be concise — this is a learning aid, not an essay.`;
+
+/**
+ * Built lazily so that importing this module (during `next build`, or from a
+ * route that never calls it) doesn't require a key to be present.
+ */
+let client: Anthropic | undefined;
+
+function getClient(): Anthropic {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error(
+      "ANTHROPIC_API_KEY is not set. Copy .env.example to .env.local, add a key " +
+        "from https://console.anthropic.com/settings/keys, then restart the dev server.",
+    );
+  }
+  // The SDK reads ANTHROPIC_API_KEY from the environment itself.
+  client ??= new Anthropic();
+  return client;
+}
+
+/**
+ * Streams a Claude response for the given conversation.
  *
- * The contract:
- *   - in:  the full conversation so far, oldest first
- *   - out: text chunks, yielded as they become available
- *
- * Yield small pieces rather than one big string — each yield is flushed to the
- * browser immediately, which is what makes the response appear incrementally.
- *
- * Honour `signal`: it aborts when the user hits Stop or closes the tab. Pass it
- * to any network call you make so you stop paying for work nobody will read.
- *
- * Throwing is fine. The route catches it, logs it server-side, and shows the
- * user an error instead of leaving the request hanging.
+ * @param messages Full conversation, oldest first.
+ * @param signal   Aborts on client disconnect; forwarded so we stop paying for
+ *                 tokens nobody will read.
+ * @returns        Text chunks, yielded as they arrive.
  */
 export async function* runAgent(
   messages: Message[],
   signal?: AbortSignal,
 ): AsyncGenerator<string> {
-  // ---------------------------------------------------------------- REPLACE ME
-  // Placeholder so the app runs end to end before the agent exists.
-  // Delete this whole block and uncomment the reference implementation below.
-  const latest = messages.at(-1)?.content ?? "";
-  const reply =
-    `This is a placeholder response — there's no agent wired up yet. ` +
-    `You said: "${latest}". ` +
-    `Implement \`runAgent\` in \`lib/agent.ts\` and this text goes away.`;
+  const stream = getClient().messages.stream(
+    {
+      model: MODEL,
+      max_tokens: MAX_TOKENS,
+      system: SYSTEM_PROMPT,
+      messages,
+    },
+    { signal },
+  );
 
-  for (const word of reply.split(" ")) {
-    if (signal?.aborted) return;
-    await new Promise((resolve) => setTimeout(resolve, 40));
-    yield word + " ";
+  for await (const event of stream) {
+    if (
+      event.type === "content_block_delta" &&
+      event.delta.type === "text_delta"
+    ) {
+      yield event.delta.text;
+    }
   }
-  // -------------------------------------------------------------- END REPLACE
 
-  /*
-   * REFERENCE IMPLEMENTATION — streaming chat against the Claude API.
-   * `@anthropic-ai/sdk` is already a dependency. Add your key to `.env.local`,
-   * then swap this in for the block above.
-   *
-   *   import Anthropic from "@anthropic-ai/sdk";
-   *
-   *   const client = new Anthropic(); // reads ANTHROPIC_API_KEY from the env
-   *
-   *   const stream = client.messages.stream(
-   *     {
-   *       model: "claude-opus-5",
-   *       max_tokens: 64000,
-   *       system: "You are a helpful assistant.",
-   *       messages,
-   *     },
-   *     { signal },
-   *   );
-   *
-   *   for await (const event of stream) {
-   *     if (
-   *       event.type === "content_block_delta" &&
-   *       event.delta.type === "text_delta"
-   *     ) {
-   *       yield event.delta.text;
-   *     }
-   *   }
-   *
-   *   const final = await stream.finalMessage();
-   *   if (final.stop_reason === "refusal") {
-   *     yield "\n\n[The model declined to answer this request.]";
-   *   }
-   *
-   * Things that will bite you if you go from memory instead of the docs:
-   *
-   *   - The model ID is exactly `claude-opus-5`. Do not append a date suffix.
-   *   - Extended thinking is ON by default, and `max_tokens` caps thinking AND
-   *     visible text together. Size it generously or answers truncate midway.
-   *   - `temperature`, `top_p`, and `top_k` are REJECTED with a 400. Steer
-   *     behaviour with the system prompt instead.
-   *   - Prefilling the assistant turn is also a 400. For structured output use
-   *     `output_config.format` instead.
-   *   - Check `stop_reason === "refusal"` before trusting the content.
-   *
-   * For tool use, wrap the above in a loop: when the model emits `tool_use`
-   * blocks, run the tools, append the results as a `user` turn, and call again.
-   * The SDK's `client.beta.messages.toolRunner()` does this loop for you.
-   */
+  // Safety classifiers can decline a request: that arrives as a normal HTTP 200
+  // with stop_reason "refusal" and little or no content, NOT as a thrown error.
+  // Without this check a refusal looks like an empty successful response.
+  const final = await stream.finalMessage();
+  if (final.stop_reason === "refusal") {
+    yield "\n\n[This request was declined by the model's safety system. Try rephrasing.]";
+  }
 }
+
+/**
+ * One-shot, non-streaming variant. Use when you want the whole answer before
+ * doing anything with it — grading a rebuttal, classifying a quote — and
+ * streaming would only complicate the caller.
+ */
+export async function promptAgent(
+  prompt: string,
+  signal?: AbortSignal,
+): Promise<string> {
+  let out = "";
+  for await (const chunk of runAgent([{ role: "user", content: prompt }], signal)) {
+    out += chunk;
+  }
+  return out;
+}
+
+/*
+ * Tuning knobs, when you need them:
+ *
+ *   output_config: { effort: "low" | "medium" | "high" | "xhigh" | "max" }
+ *     Trades depth against latency and cost. Defaults to "high". For short
+ *     classification or grading calls, "low" or "medium" is usually plenty and
+ *     noticeably faster.
+ *
+ *   output_config: { format: { type: "json_schema", schema: … } }
+ *     Structured output. Use this instead of prefilling the assistant turn,
+ *     which returns a 400 on this model.
+ *
+ * Do NOT add `temperature`, `top_p`, or `top_k` — all three are rejected with a
+ * 400 on Opus 5. Steer behaviour through SYSTEM_PROMPT instead.
+ *
+ * For tool use, loop: when the response contains `tool_use` blocks, execute
+ * them, append the results as a `user` turn, and call again. The SDK's
+ * `client.beta.messages.toolRunner()` does that loop for you.
+ */
