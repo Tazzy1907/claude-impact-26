@@ -6,7 +6,7 @@ import { QuizScreen } from "@/components/quiz/QuizScreen";
 import { ResultsScreen } from "@/components/quiz/ResultsScreen";
 import { WelcomeScreen } from "@/components/quiz/WelcomeScreen";
 import { QUIZ_CONFIG } from "@/lib/config";
-import { getQuestions, getTactic, shuffleQuestions } from "@/lib/content";
+import { getQuestions, getTactic, pickRound } from "@/lib/content";
 import {
   initialState,
   primaryAction,
@@ -21,6 +21,10 @@ import type { TacticId } from "@/lib/types";
  * `lib/quiz-machine.ts` and its content in `content/`.
  */
 export default function Home() {
+  /* The bank stands in until a round is drawn. Rounds are sampled randomly, so
+     they can only be drawn from an event handler — sampling here would have the
+     server and the client pick different questions. The welcome screen shows no
+     question, so nothing is waiting on it. */
   const [state, setState] = useState(() => initialState(getQuestions()));
 
   // Modal state is presentation, not quiz progress, so it stays out of the
@@ -29,10 +33,11 @@ export default function Home() {
 
   const restart = () =>
     setState((prev) =>
-      startQuiz(
-        prev,
-        QUIZ_CONFIG.shuffleOnRestart ? shuffleQuestions(prev.questions) : getQuestions(),
-      ),
+      /* A fresh draw by default: with five questions coming out of forty,
+         "Start again" returning the same five would waste the bank. Setting
+         the flag false replays the round just finished instead, for anyone
+         who wants another go at the ones they missed. */
+      startQuiz(prev, QUIZ_CONFIG.shuffleOnRestart ? pickRound() : prev.questions),
     );
 
   return (
@@ -45,7 +50,7 @@ export default function Home() {
       </nav>
 
       {state.screen === "welcome" && (
-        <WelcomeScreen onStart={() => setState((prev) => startQuiz(prev))} />
+        <WelcomeScreen onStart={() => setState((prev) => startQuiz(prev, pickRound()))} />
       )}
 
       {state.screen === "quiz" && (
