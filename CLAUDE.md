@@ -37,26 +37,40 @@ Do not add Claude API calls in Phase 1. The content is static; a live demo shoul
 
 ## Stack & layout
 
-- **Next.js 16 (App Router) + React 19 + TypeScript + Tailwind CSS v4**
-- **No `src/` directory** — `app/` and `lib/` sit at the repo root. Imports use the `@/` alias, e.g. `@/lib/types`.
+- **Next.js 16 (App Router) + React 19 + TypeScript (strict) + Tailwind CSS v4**
+- **No `src/` directory** — `app/` and `lib/` sit at the repo root. `@/*` maps to `./*`, so import as `@/lib/types`.
 - No database, no auth, no server state. Session progress lives in React state; anything that must survive a refresh goes in `localStorage`.
 
 ```
 app/
   page.tsx              # Phase 1: the quiz (currently the scaffold's chat UI)
+  layout.tsx            # root layout — Geist fonts, flex-column shell
+  globals.css           # Tailwind entry + theme tokens (see Styling & theming)
   api/chat/route.ts     # streaming HTTP layer — unused in Phase 1, kept for Phase 2
-components/
+components/             # to be created
   quiz/                 # QuestionCard, OptionButton, AnswerReveal, ProgressBar
   ui/                   # generic primitives (Button, Popover, Card)
-content/
+content/                # to be created
   tactics.ts            # the taxonomy — definitions, examples
   questions.ts          # the question bank
 lib/
   types.ts              # shared types; chat Message types already live here
   agent.ts              # Claude calls — placeholder, untouched in Phase 1
-  quiz-machine.ts       # pure state transitions
-  scoring.ts            # pure scoring
+  quiz-machine.ts       # pure state transitions — to be created
+  scoring.ts            # pure scoring — to be created
 ```
+
+`app/layout.tsx` sets `<html class="h-full">` and `<body class="min-h-full flex flex-col">`, so the page is a flex column filling the viewport. Top-level page content needs `flex-1` to claim the space — the scaffold's `<main>` shows the pattern.
+
+## Styling & theming
+
+**Tailwind v4 is configured in CSS, not JavaScript.** There is no `tailwind.config.*` and adding one is the wrong move. Design tokens live in the `@theme inline` block in `app/globals.css`; extend the palette there and the utility classes follow.
+
+**Dark mode is automatic**, driven by `prefers-color-scheme` in `app/globals.css`, and the scaffold pairs `dark:` variants throughout its markup. Every quiz surface must therefore be legible in both schemes — a card that only works on white is a broken card. Verify both before calling a component done.
+
+**Fonts are already wired.** Geist Sans and Geist Mono are loaded in `app/layout.tsx` and exposed as `--font-sans` / `--font-mono`, so `font-sans` and `font-mono` just work. Don't import another font.
+
+`--background` / `--foreground` are the semantic base colours. Prefer them and the `black/N` `white/N` opacity pattern the scaffold uses over hardcoded greys, so light and dark stay in step.
 
 **Content lives in `content/` and nowhere else.** No question text, quote, or tactic definition inline in a component — ever. This is the seam that lets Phase 2 swap a static bank for a generated one without touching the UI.
 
@@ -169,6 +183,11 @@ These are the project's quality bar. Hold them.
 **The reveal is the product.** Getting it wrong should feel like the most useful moment in the app, not a punishment. Show what the tactic was, why it applies here, why the option they picked doesn't, and what they could say back. No harsh red, no penalty sounds, no streak-breaking drama.
 
 **Accessibility is not a phase-3 concern.** Full keyboard operation, visible focus rings, correctness never signalled by colour alone (pair with icon and text), and respect `prefers-reduced-motion`.
+
+Two things in the scaffold not to copy, since the quiz is far more keyboard- and motion-sensitive than a chat box:
+
+- It animates (`animate-pulse` caret, `scrollIntoView({ behavior: "smooth" })`) with no `prefers-reduced-motion` guard, and `app/globals.css` has no reduced-motion block. Add one there rather than repeating the omission per component.
+- Its textarea uses `outline-none` and signals focus with a border-colour shift only. Options in this app are chosen by keyboard, so focus must be unmistakable — keep the ring, or replace it with something at least as visible.
 
 ## Architectural seams
 
