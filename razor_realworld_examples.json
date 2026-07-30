@@ -1,0 +1,93 @@
+{
+  "meta": {
+    "name": "Razor — Real-World Fallacies (pure examples, distilled)",
+    "version": "2.0",
+    "categories": ["ad_hominem", "strawman", "false_dilemma"],
+    "count": 9,
+    "schema": ["id", "category", "platform", "source", "context", "prompt", "explanation"],
+    "notes": "Demo set: every item is a clean, unambiguous instance of exactly one fallacy. Boundary cases removed — whataboutism/tu quoque items (Yamal ex, bean soup, Greta hypocrisy), mixed items (if-you-don't-like-it), and contested items (Blockout 2024) were cut because they straddle other fallacies or, in the tu quoque case, belong to a separate Razor concept. Comments are close paraphrases of real posts, not verbatim copies; only public figures are named."
+  },
+  "items": [
+    {
+      "id": "rw_ah_04",
+      "category": "ad_hominem",
+      "platform": "Sports TV / X / Reddit",
+      "source": "'You never played the game' — pundit vs. ex-athlete discourse",
+      "context": "A staple of sports arguments: when an analyst or fan makes a tactical point, someone dismisses it on the grounds that they never played professionally. Versions have been said on air by ex-players and by managers like Pep Guardiola.",
+      "prompt": "You never played the game at any level, so what would you actually know about it? Leave the analysis to people who've been on the pitch.",
+      "explanation": "It rejects the point based on the speaker's playing credentials rather than engaging what they said. Someone who never played can still read a game correctly — the tactical claim stands or falls on its own."
+    },
+    {
+      "id": "rw_ah_05",
+      "category": "ad_hominem",
+      "platform": "X / YouTube comments",
+      "source": "Fan replies to a lukewarm album review",
+      "context": "A music critic published a middling review of a hugely anticipated album, listing specific problems with the production and songwriting. Rather than contest any of those points, fans went after the critic personally.",
+      "prompt": "You're just a bitter, washed-up wannabe who could never make it in music yourself. Why would anyone care what a jealous failure thinks about real artists?",
+      "explanation": "The reply attacks the critic's career and supposed motives and never touches a single point the review actually made. Whether the critic is a failed musician has no bearing on whether the criticisms are accurate."
+    },
+    {
+      "id": "rw_ah_06",
+      "category": "ad_hominem",
+      "platform": "X / Instagram comments",
+      "source": "Reply to a reality-TV personality's take on a news story",
+      "context": "A reality-TV personality posted a reasoned opinion about a current policy debate. The most-liked reply ignored the argument entirely and attacked the poster's intelligence.",
+      "prompt": "This is what happens when someone with zero education and a room-temperature IQ gets a platform. Nothing this person says is worth reading.",
+      "explanation": "It dismisses the opinion by insulting the poster's intelligence and schooling instead of addressing anything they argued. A point is right or wrong regardless of how clever the person making it is."
+    },
+    {
+      "id": "rw_sm_01",
+      "category": "strawman",
+      "platform": "X / Reddit / Steam forums",
+      "source": "FromSoftware 'easy mode' accessibility debate (Sekiro 2019, Elden Ring 2022-24)",
+      "context": "Accessibility advocates, including AbleGamers' Steve Spohn, asked for optional settings in FromSoftware's notoriously hard games — things like remappable controls and visual/audio aids that affect only the player who turns them on. Defenders responded to something else entirely.",
+      "prompt": "So you want them to dumb the whole game down and strip out everything that makes it special, just so it's easy for everyone? Git gud.",
+      "explanation": "The actual request was for optional aids that change nothing for other players. That gets swapped for 'make the game easy for everyone,' which is then attacked — a distortion standing in for the real position."
+    },
+    {
+      "id": "rw_sm_03",
+      "category": "strawman",
+      "platform": "X / Facebook",
+      "source": "Absolutist reframe of a modest policy position",
+      "context": "A recurring shape in online political argument: a bounded, moderate claim gets restated as an extreme absolute, and the absolute is what gets attacked.",
+      "prompt": "Oh, so because you want 'some' environmental rules, you basically want to shut down every business in the country and put people out of work.",
+      "explanation": "'Some regulation' is inflated into 'shut down all business,' then knocked over. The giveaway is the jump from a qualified claim to an absolute one nobody actually made."
+    },
+    {
+      "id": "rw_sm_04",
+      "category": "strawman",
+      "platform": "X / football forums",
+      "source": "Ballon d'Or debate",
+      "context": "During awards season a fan argued that a particular star hadn't earned this year's Ballon d'Or, pointing to a quieter season than usual. Another fan responded to a claim that was never made.",
+      "prompt": "So now he's a rubbish player who should be dropped from the squad and forgotten, is that it? Absolute clown take.",
+      "explanation": "The original claim was narrow — that he didn't deserve this specific award this year. That gets blown up into 'he's a rubbish player who should be dropped,' a far bigger claim that's easier to ridicule."
+    },
+    {
+      "id": "rw_fd_01",
+      "category": "false_dilemma",
+      "platform": "LinkedIn",
+      "source": "NHS Employers — Working-from-home tax relief to be abolished (Dec 2025)",
+      "context": "In the 2025 Autumn Budget the UK government confirmed working-from-home tax relief ends in April 2026, meaning around 300,000 employees can no longer claim the £6/week deduction for household costs. The change reignited remote-vs-office arguments.",
+      "prompt": "Simple choice here: either you're a serious professional who comes into the office, or you're someone who wants to coast at home in their pyjamas and collect a salary. There's no in-between.",
+      "explanation": "It presents two extremes as the only options and explicitly rules out any middle. Productive remote workers, hybrid arrangements, and role-dependent setups all sit in the 'in-between' the framing pretends doesn't exist."
+    },
+    {
+      "id": "rw_fd_03",
+      "category": "false_dilemma",
+      "platform": "X / TikTok",
+      "source": "'With us or against us' — cause and boycott discourse",
+      "context": "The archetypal binary that surfaces in almost every online mobilisation: declining to endorse a specific action or framing is treated as siding with the enemy.",
+      "prompt": "If you're not willing to say it loudly right now, then you're on the other side. There's no neutral here.",
+      "explanation": "It wipes out neutrality, partial agreement, being under-informed, and every alternative form of support — collapsing a spectrum into two camps. Silence or hesitation isn't logically the same as opposition."
+    },
+    {
+      "id": "rw_fd_04",
+      "category": "false_dilemma",
+      "platform": "Instagram / TikTok",
+      "source": "'Max out or go home' — fitness & hustle influencer content",
+      "context": "A staple of hustle and gym-influencer posts: any level of effort short of total commitment is framed as failure.",
+      "prompt": "Either you're grinding every single day and pushing past the pain, or you're lazy and you don't want it badly enough. Pick one.",
+      "explanation": "It ignores the entire moderate middle — consistent light training, planned rest, sustainable pace. Effort isn't a binary of 'all-out' versus 'lazy,' though the framing insists it is."
+    }
+  ]
+}
