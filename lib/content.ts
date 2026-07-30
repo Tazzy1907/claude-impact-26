@@ -12,55 +12,27 @@ export function getTactic(id: TacticId): Tactic {
   return TACTICS[id];
 }
 
-export function getAllTactics(): Tactic[] {
-  return Object.values(TACTICS);
-}
-
-export interface RoundOptions {
-  /** How many questions to serve. Omit for the whole bank. */
-  length?: number;
-  /** Deterministic ordering. The same seed always yields the same round. */
-  seed?: number;
-}
-
 /**
- * A round is however many questions this returns — nothing downstream
- * assumes a fixed count.
+ * The round, in authored order. A round is however many questions this
+ * returns — nothing downstream assumes a fixed count.
  *
- * Ordering is seeded rather than random so the server and client render the
- * same first round and hydration stays quiet. A new seed, generated in an
- * event handler after mount, is what makes a replay different.
+ * Order is stable rather than random so the server and the client render the
+ * same first question and hydration stays quiet. `shuffleQuestions` is the
+ * opt-in exception, and only ever runs from an event handler.
  */
-export function getRound({ length, seed = 1 }: RoundOptions = {}): Question[] {
-  const ordered = shuffle(QUESTIONS, seed);
-  return length === undefined ? ordered : ordered.slice(0, length);
-}
-
-export function getQuestionCount(): number {
-  return QUESTIONS.length;
+export function getQuestions(): Question[] {
+  return QUESTIONS;
 }
 
 /**
- * Fisher-Yates driven by a mulberry32 PRNG — small, fast and, unlike
- * `Math.random`, reproducible from a seed.
+ * Fisher-Yates. Call only from an event handler — using `Math.random` during
+ * render would make the server and client disagree.
  */
-export function shuffle<T>(items: readonly T[], seed: number): T[] {
-  const next = mulberry32(seed);
-  const out = [...items];
+export function shuffleQuestions(questions: readonly Question[]): Question[] {
+  const out = [...questions];
   for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(next() * (i + 1));
+    const j = Math.floor(Math.random() * (i + 1));
     [out[i], out[j]] = [out[j], out[i]];
   }
   return out;
-}
-
-function mulberry32(seed: number): () => number {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
 }

@@ -68,98 +68,62 @@ export interface Evaluation {
 /* ── Quiz (Phase 1) ───────────────────────────────────────────────────── */
 
 /**
- * Permanent identifiers. A display name may be reworded freely; changing an
- * id silently invalidates every question that references it.
+ * The answer keys the quiz offers. These mirror the `FALLACIES` map in the
+ * `Mindshield.dc.html` design exactly — the design is the specification for
+ * what ships, so the set is deliberately small. Ids are kebab-case per this
+ * repo's convention; they are internal and never rendered.
+ *
+ * `valid` is not a fallacy. It is the option for an argument whose reasoning
+ * actually holds, and it is what stops the quiz from teaching people that
+ * every confident-sounding claim must be a trick.
  */
 export type TacticId =
-  // Logical fallacies
-  | "ad-hominem"
   | "straw-man"
   | "false-dilemma"
   | "slippery-slope"
-  | "hasty-generalisation"
-  | "false-cause"
-  | "circular-reasoning"
-  | "whataboutism"
+  | "ad-hominem"
   | "appeal-to-authority"
-  | "no-true-scotsman"
-  // Emotional manipulation
-  | "appeal-to-fear"
-  | "appeal-to-outrage"
-  | "guilt-tripping"
-  | "gaslighting"
-  | "darvo"
-  // Rhetorical tricks
-  | "loaded-question"
-  | "loaded-language"
-  | "bandwagon"
-  | "motte-and-bailey"
-  | "cherry-picking"
-  | "gish-gallop"
-  | "sealioning";
-
-export type TacticFamily =
-  | "logical-fallacy"
-  | "emotional-manipulation"
-  | "rhetorical-trick";
+  | "valid";
 
 export interface Tactic {
   id: TacticId;
   /** Display name, e.g. "Straw Man". */
   name: string;
-  family: TacticFamily;
-  /** <= 15 words, shown in the hover/tap definition. */
-  shortDef: string;
-  /** 2-3 sentences, shown after answering. */
-  longDef: string;
-  /** One canonical line, distinct from any quote in the bank. */
-  example: string;
-  /** What you can actually say when it's used on you. */
-  counterMove: string;
+  /** Shown in the definition dialog behind "What does this mean?". */
+  def: string;
 }
-
-export type Difficulty = 1 | 2 | 3;
 
 export interface Question {
   id: string;
-  /** The thing a person says. */
-  quote: string;
-  /** Sets the scene, e.g. "Reply under a news post". Never names a real person. */
-  context: string;
-  /** Display order is shuffled at runtime. */
+  /** The argument under examination. Rendered verbatim. */
+  statement: string;
+  /** Display order is fixed — the design does not shuffle options. */
   optionIds: [TacticId, TacticId, TacticId, TacticId];
   /** Must be one of `optionIds`. */
   answerId: TacticId;
-  /** Why the answer is right, grounded in the quote's wording. */
+  /** Why the answer is right, grounded in the statement's wording. */
   explanation: string;
-  /** Why each wrong option is wrong *here*. */
-  distractorNotes: Partial<Record<TacticId, string>>;
-  /** One sentence the user could say back. */
-  rebuttal: string;
-  difficulty: Difficulty;
 }
 
 /* ── Quiz state (see lib/quiz-machine.ts) ─────────────────────────────── */
 
-/**
- * `answering` — the question is live and nothing is committed.
- * `revealed`  — a pick is locked in and the teaching panel is showing.
- * `complete`  — the round is over and the summary is showing.
- */
-export type QuizPhase = "answering" | "revealed" | "complete";
+/** The three screens of the design, in the order they are reached. */
+export type Screen = "welcome" | "quiz" | "results";
 
 export interface AnswerRecord {
   questionId: string;
   pickedId: TacticId;
-  correct: boolean;
+  isCorrect: boolean;
 }
 
 export interface QuizState {
+  screen: Screen;
   /** The round. However many questions the content module handed over. */
   questions: Question[];
   index: number;
-  /** The pick for the current question, once made. */
-  pickedId: TacticId | null;
+  /** The current selection, before it is committed. */
+  selected: TacticId | null;
+  /** Whether the current question's answer is locked in and feedback showing. */
+  submitted: boolean;
   answers: AnswerRecord[];
-  phase: QuizPhase;
 }

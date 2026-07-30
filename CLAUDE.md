@@ -20,7 +20,14 @@ The premise: the attention economy rewards outrage, and the people best at explo
 
 ## Development phases
 
-**Phase 1 (current — POC).** A single-player MCQ quiz. Each question shows a quote and four candidate tactics. The user picks one, sees whether they were right, and reads why. Users can inspect any option's definition before answering. Static content, no accounts, no LLM calls.
+**Phase 1 (current — POC).** **Mindshield**, a single-player MCQ quiz. Three screens — welcome, question, results. Each question shows one argument and four candidate answers; the user selects, submits, reads why, and moves on. Any fallacy's definition can be opened in a dialog before committing. Static content, no accounts, no LLM calls.
+
+> **`Mindshield.dc.html` in the Claude Design project is the specification for
+> what Phase 1 ships** — its screens, copy, question bank, answer keys and
+> interaction order are all authoritative. Where this file and that one
+> disagree about the shipped surface, the design wins; treat the rest of this
+> document as product intent and backlog. Re-read the design before changing
+> the UI. See [DESIGN.md](DESIGN.md) for how it reaches the browser.
 
 **Phase 2 and beyond.** Not committed. Likely directions: free-text rebuttal practice graded by Claude, user-pasted real-world content, progression and spaced repetition. **Do not build for these now** — but keep the seams clean (see [Architectural seams](#architectural-seams)).
 
@@ -49,14 +56,15 @@ app/
   globals.css           # Tailwind entry, Classical tokens, component layer
   api/chat/route.ts     # streaming HTTP layer — unused in Phase 1, kept for Phase 2
 components/
-  quiz/                 # QuestionCard, OptionList, AnswerReveal, ProgressRule,
-                        #   RoundSummary
+  quiz/                 # WelcomeScreen, QuizScreen, ResultsScreen,
+                        #   DefinitionDialog — one per branch of the design
 content/
-  tactics.ts            # the taxonomy — definitions, examples
+  tactics.ts            # the answer keys — names and definitions
   questions.ts          # the question bank
 lib/
   types.ts              # shared types; chat Message types live here too
   content.ts            # the only door onto content/ — see Architectural seams
+  config.ts             # the design's three editor props, as configuration
   agent.ts              # Claude calls — placeholder, untouched in Phase 1
   quiz-machine.ts       # pure state transitions
   scoring.ts            # pure scoring
@@ -89,41 +97,47 @@ is only worth adding when a primitive needs real behaviour.
 Quiz types go in `lib/types.ts`, alongside the existing chat `Message` types. Keep the two groups visually separated; they serve different phases.
 
 ```ts
-// A union of the 22 kebab-case slugs, e.g. 'straw-man'. `content/tactics.ts`
+// The answer keys the design offers, as kebab-case slugs. `content/tactics.ts`
 // is typed `Record<TacticId, Tactic>`, so the build fails if an id has no
-// definition behind it and a question can't reference a tactic that doesn't exist.
-type TacticId = 'ad-hominem' | 'straw-man' | /* … */ 'sealioning';
-
-type TacticFamily = 'logical-fallacy' | 'emotional-manipulation' | 'rhetorical-trick';
+// definition behind it and a question can't reference a key that doesn't exist.
+type TacticId =
+  | 'straw-man' | 'false-dilemma' | 'slippery-slope'
+  | 'ad-hominem' | 'appeal-to-authority'
+  | 'valid';               // not a fallacy — the reasoning actually holds
 
 interface Tactic {
-  id: TacticId;          // stable slug; never reuse or repurpose
-  name: string;          // display name, e.g. "Straw Man"
-  family: TacticFamily;
-  shortDef: string;      // <= 15 words, shown in the hover/tap definition
-  longDef: string;       // 2-3 sentences, shown after answering
-  example: string;       // one canonical line, distinct from any quote in the bank
-  counterMove: string;   // what you can actually say when it's used on you
+  id: TacticId;            // stable slug; never reuse or repurpose
+  name: string;            // display name, e.g. "Straw Man"
+  def: string;             // shown in the "What does this mean?" dialog
 }
 
 interface Question {
   id: string;
-  quote: string;                 // the thing a person says
-  context: string;               // e.g. "Reply under a news post" — sets the scene, never names a real person
-  optionIds: [TacticId, TacticId, TacticId, TacticId];  // display order is shuffled at runtime
-  answerId: TacticId;            // must be one of optionIds
-  explanation: string;           // why the answer is right, grounded in the quote's wording
-  distractorNotes: Partial<Record<TacticId, string>>;  // why each wrong option is wrong here
-  rebuttal: string;              // one sentence the user could say back
-  difficulty: 1 | 2 | 3;
+  statement: string;       // the argument under examination
+  optionIds: [TacticId, TacticId, TacticId, TacticId];  // fixed order — the design doesn't shuffle
+  answerId: TacticId;      // must be one of optionIds
+  explanation: string;     // why the answer is right, grounded in the statement's wording
 }
+
+// Three screens, and within the quiz screen a select-then-submit cycle.
+type Screen = 'welcome' | 'quiz' | 'results';
 ```
 
-`distractorNotes` and `rebuttal` are not optional extras — they are where the actual learning happens. A question without them is incomplete.
+`valid` is load-bearing, not a filler option. Without it the quiz teaches that
+every confident-sounding argument must be a trick, which is the opposite of the
+product's job — and "this one is actually fine" is a genuinely hard call to
+make. It appears as an option on every question in the bank.
 
 ## The tactic taxonomy
 
-Phase 1 ships a focused set. Prefer deepening these over adding more; a user who reliably spots twelve tactics is better served than one who half-recognises forty.
+**What Phase 1 actually ships is the design's six answer keys** — Straw Man,
+False Dilemma, Slippery Slope, Ad Hominem, Appeal to Authority, and `valid` —
+across five questions. That is the whole live taxonomy.
+
+The tables below are the **backlog**, not the current content. Prefer deepening
+what ships over adding from them; a user who reliably spots six is better served
+than one who half-recognises forty. Anything added here has to arrive in the
+design file first — see the note under [Development phases](#development-phases).
 
 ### Logical fallacies — the argument's structure is broken
 
@@ -189,9 +203,9 @@ These are the project's quality bar. Hold them.
 
 ## Interaction requirements
 
-**Definitions on demand.** Users must be able to read what each tactic means *before* committing to an answer — most will not know all four terms. The mechanic is hover **plus** click/tap **plus** keyboard focus. Hover-only is inaccessible on touch and to keyboard users, and this is a learning tool, so an unreachable definition is a broken feature.
+**Definitions on demand.** Users must be able to read what each fallacy means *before* committing to an answer — most will not know all four terms. The design's mechanic is a "What does this mean?" button on every option, opening a dialog. It works by pointer, touch and keyboard alike, which is the requirement; hover-only would not be. `Valid argument` is the one option without a button, because there is no trick to look up.
 
-**The reveal is the product.** Getting it wrong should feel like the most useful moment in the app, not a punishment. Show what the tactic was, why it applies here, why the option they picked doesn't, and what they could say back. No harsh red, no penalty sounds, no streak-breaking drama.
+**The reveal is the product.** Getting it wrong should feel like the most useful moment in the app, not a punishment. The answer key and the chosen option are both marked in place, and the feedback card says why. No harsh red, no penalty sounds, no streak-breaking drama.
 
 **Accessibility is not a phase-3 concern.** Full keyboard operation, visible focus rings, correctness never signalled by colour alone (pair with icon and text), and respect `prefers-reduced-motion`.
 
@@ -232,8 +246,11 @@ No test runner is configured. `lib/quiz-machine.ts` and `lib/scoring.ts` are wri
 
 ## When adding a question
 
-1. Write the quote first, on its own. Does it sound like something a person would actually say?
-2. Identify the tactic. If you hesitate between two, the quote is ambiguous — fix the quote, not the answer key.
-3. Choose three distractors that a reasonable person might pick, and write `distractorNotes` explaining why each misses.
-4. Write the `rebuttal`. If you can't produce a natural one, the question probably isn't teaching anything actionable.
-5. Check the bank's overall balance: political lean, correct-answer position, tactic coverage, difficulty spread.
+Add it to `Mindshield.dc.html` in the Claude Design project as well, or the two
+will drift and the design stops being the specification.
+
+1. Write the statement first, on its own. Does it sound like something a person would actually say?
+2. Identify the answer. If you hesitate between two, the statement is ambiguous — fix the statement, not the answer key.
+3. Choose three distractors a reasonable person might pick. `valid` belongs among the options on every question — it is what stops the quiz teaching that everything is a trick.
+4. Write the `explanation`, quoting the actual words that do the work.
+5. Check the bank's overall balance: political lean, correct-answer position, and coverage of the answer keys. **The current five questions never make `appeal-to-authority` the answer** — it appears only as a distractor, so nobody is ever tested on it. Worth fixing next time the bank grows.

@@ -455,130 +455,95 @@ textarea.input { min-height: 90px; resize: vertical; }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   Application layer — patterns this product needs that Classical does not
-   define. Built only from its tokens and following its rules (stroke over
-   fill, hairline structure, elevation as a whisper), so they sit alongside
-   the ported layer without arguing with it. Candidates to push upstream.
+   Application layer — the handful of patterns `Mindshield.dc.html` builds
+   inline that Classical does not define as classes. Values are transcribed
+   from the design rather than re-derived, so the rendered result matches it
+   exactly; where the design used a raw pixel value instead of a token that
+   is preserved and called out. Candidates to push upstream.
    ══════════════════════════════════════════════════════════════════════ */
 
-/* The quote under examination. Display sizes take the normal cut, not the
-   semibold interface weight — the biggest text sets lightest. */
-.quote {
-  font-family: var(--font-heading);
-  font-weight: 400;
-  font-size: 25px;
-  line-height: 1.28;
-  letter-spacing: -0.015em;
-  margin: 0;
-  padding-left: var(--space-4);
-  border-left: 1px solid var(--color-accent);
-}
-@media (min-width: 640px) {
-  .quote { font-size: 30px; }
-}
-
-/* An answer option. An outlined control like `.btn`, sized for two lines of
-   text and left-aligned, since these are statements rather than actions. */
-.option {
+/* An answer row: the radio and its label on the left, the post-submit tag or
+   the "What does this mean?" button on the right. 12px/14px are the design's
+   own literals — the nearest token, --space-3, is 13.8px. */
+.option-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-3);
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  font-family: var(--font-heading);
-  font-weight: var(--font-heading-weight);
-  font-size: 16px;
-  line-height: 1.25;
-  color: var(--color-text);
-  background: transparent;
-  border: 1px solid var(--color-divider);
+  padding: 12px 14px;
   border-radius: var(--radius-md);
-  padding: var(--space-3) var(--space-4);
-}
-.option:hover:not(:disabled) {
-  border-color: var(--color-accent);
-  background: color-mix(in srgb, var(--color-accent) 7%, transparent);
-}
-.option:active:not(:disabled) { background: color-mix(in srgb, var(--color-accent) 14%, transparent); }
-.option:disabled { cursor: default; }
-
-/* Reveal states. Correctness is never carried by colour alone — each of
-   these pairs with an icon and a word in the markup. */
-.option-answer {
-  border-color: var(--color-accent);
-  box-shadow: inset 0 0 0 1px var(--color-accent);
-}
-/* The wrong pick. Deliberately not red: a heavier hairline and a label, so
-   it reads as "not this one", not as a penalty. */
-.option-missed {
-  border-style: dashed;
-  border-color: color-mix(in srgb, var(--color-text) 45%, transparent);
-}
-.option-dimmed { opacity: 0.55; }
-
-.option-mark { flex: none; color: var(--color-accent); }
-.option-label {
-  margin-left: auto;
-  flex: none;
-  font-family: var(--font-body);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-text) 60%, transparent);
+  border: 1px solid var(--color-divider);
+  background: transparent;
 }
 
-/* Definition rail — holds the shortDef of whichever option is hovered,
-   focused or pinned. A reserved block rather than a floating popover, so
-   nothing reflows as the pointer moves down the list. */
-.def-rail {
-  min-height: 62px;
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
-  border-top: 1px solid var(--color-divider);
-  border-bottom: 1px solid var(--color-divider);
-  font-size: 13px;
+/* Pre-submit: the current selection. */
+.option-row-selected {
+  border: 1px solid var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 6%, transparent);
 }
 
-/* Progress. A hairline that fills — the structure of the page is rules, so
-   the progress indicator is one too. */
-.progress {
-  height: 1px;
-  width: 100%;
-  background: var(--color-divider);
+/* Post-submit: the answer key, whether or not it was the one chosen. The
+   border thickens to 2px exactly as the design specifies. */
+.option-row-correct {
+  border: 2px solid var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 6%, transparent);
 }
-.progress-fill {
+
+/* Post-submit: a wrong pick. Dashed and neutral rather than red — it reads as
+   "not this one", not as a penalty. Correctness is never carried by colour
+   alone; every one of these rows also gets an icon and a word in the markup. */
+.option-row-wrong {
+  border: 2px dashed var(--color-neutral-700);
+}
+
+/* Progress. A filling bar rather than Classical's hairline, per the design. */
+.progress-track {
+  height: 4px;
+  background: var(--color-neutral-200);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.progress-bar {
   height: 100%;
   background: var(--color-accent);
-  transition: width 200ms ease-out;
+  transition: width 0.3s ease;
 }
 
-/* The teaching panel after an answer. Tinted a single step off the ground —
-   the one place a fill is allowed, because it has to read as a distinct
-   register from the question above it. */
-.reveal {
+/* The numeral beside each step on the welcome screen. */
+.step-index {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  color: var(--color-accent);
+  width: 30px;
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The results headline. Display sizes take the normal cut, not the semibold
+   interface weight — the biggest text sets lightest. */
+.score-figure {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 56px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* Compact per-question chips, used when reviewDetail is "summary". */
+.summary-chip {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  border: 1px solid var(--color-divider);
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
   border-radius: var(--radius-md);
-  background: var(--color-surface);
+  font-size: 12px;
 }
-.reveal-heading {
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-text) 55%, transparent);
-  margin-bottom: 3px;
+.summary-chip-correct { border: 1px solid var(--color-accent); }
+.summary-chip-wrong { border: 1px dashed var(--color-neutral-700); }
+
+/* The feedback card's entrance. Neutralised by the reduced-motion block. */
+@keyframes mindshieldFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-/* The sentence you could actually say back — the payload of the whole
-   screen, so it gets the accent rule and the body face at reading size. */
-.rebuttal {
-  font-size: 15px;
-  line-height: 1.5;
-  padding-left: var(--space-3);
-  border-left: 2px solid var(--color-accent);
-}
+.fade-in { animation: mindshieldFadeIn 0.25s ease; }
