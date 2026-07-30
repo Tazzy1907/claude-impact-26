@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { isEvaluation } from "./types";
 import type { Evaluation, RebuttalSubmission, Score } from "./types";
 
 /**
@@ -200,19 +201,6 @@ export async function evaluateRebuttal(
     throw new Error(`Grader returned an unexpected shape: ${text.slice(0, 200)}`);
   }
   return parsed;
-}
-
-function isEvaluation(value: unknown): value is Evaluation {
-  if (typeof value !== "object" || value === null) return false;
-  const v = value as Partial<Evaluation>;
-  return (
-    typeof v.score === "number" &&
-    Number.isInteger(v.score) &&
-    v.score >= 0 &&
-    v.score <= 5 &&
-    typeof v.feedback === "string" &&
-    typeof v.identifiedCorrectly === "boolean"
-  );
 }
 
 export type { Evaluation, RebuttalSubmission, Score };
