@@ -126,8 +126,9 @@ interchangeable with the design system's own pages:
 · `.tag` (`.tag-accent`, `.tag-accent-2`, `.tag-neutral`, `.tag-outline`) ·
 `.nav` · `.dialog` · `.plate` · `.text-muted`
 
-The forms classes are unused in Phase 1 and ported anyway: Phase 2's free-text
-rebuttal lands on `textarea.input`, and a partial port is how systems drift.
+Porting the forms classes before anything used them turned out to be the right
+call: the free-text round landed on `textarea.input` with no new CSS at all.
+A partial port is how systems drift.
 
 **Application layer** — the handful of patterns `Mindshield.dc.html` builds
 with inline styles rather than classes. Values are transcribed from that file
@@ -142,8 +143,19 @@ rather than re-derived, so the rendered result matches it exactly:
 | `.summary-chip` + `-correct`, `-wrong` | Compact per-question chips, used when `reviewDetail` is `summary` |
 | `.fade-in` | The feedback card's entrance, neutralised by the reduced-motion block |
 | `.tnum` | Tabular figures for anything that stands as a figure or a column |
+| `.mode-card` | A selectable card on the mode picker — a label wrapping a hidden radio |
+| `.score-pips`, `.pip` + `-filled` | The five dots beside a rebuttal's mark |
+| `.score-mark` | The per-question 20px mark, smaller sibling of `.score-figure` |
 
 These are the candidates to push back upstream into Classical.
+
+The last three arrived with the free-text round rather than from
+`Mindshield.dc.html`, and are built from tokens rather than transcribed.
+`.mode-card` hides its input exactly as Classical's `.radio` does
+(`position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none`)
+and carries the selected state on the label via `:has(input:checked)`, so the
+whole card is one target for pointer, touch and keyboard alike. Note that this
+makes the input invisible to a test driver — click the label, as a person does.
 
 One deliberate exception to the token rule: `.option-row` keeps the design's
 literal `padding: 12px 14px`. The nearest token, `--space-3`, is 13.8px, and

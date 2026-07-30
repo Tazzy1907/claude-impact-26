@@ -25,3 +25,18 @@ export const QUIZ_CONFIG: QuizConfig = {
   reviewDetail: "detailed",
   shuffleOnRestart: true,
 };
+
+/**
+ * Which grader the free-text flow runs on. See `lib/grader.ts`.
+ *
+ * `offline` is the default for the same reason Phase 1 ships static content: a
+ * demo shouldn't fall over because a key is missing or the network is slow.
+ * Set `claude` — with `ANTHROPIC_API_KEY` in `.env.local` — for real grading.
+ */
+export interface GraderConfig {
+  mode: "offline" | "claude";
+}
+
+export const GRADER_CONFIG: GraderConfig = {
+  mode: "offline",
+};

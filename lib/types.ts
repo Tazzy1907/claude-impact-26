@@ -45,6 +45,12 @@ export type Score = 0 | 1 | 2 | 3 | 4 | 5;
 export interface RebuttalSubmission {
   /** The manipulative line the learner was shown. */
   quote: string;
+  /**
+   * The answer key as an id. The Claude evaluator reads the name and the
+   * explanation instead, but the offline grader needs a stable key to look its
+   * cue lists up by — a display name would break the moment one is reworded.
+   */
+  tacticId: TacticId;
   /** Display name of the tactic it uses, e.g. "Ad hominem". */
   tacticName: string;
   /** Why the quote is an instance of that tactic — the answer key. */
@@ -63,6 +69,27 @@ export interface Evaluation {
    * "can they spot it yet?" without conflating that with rebuttal quality.
    */
   identifiedCorrectly: boolean;
+}
+
+/**
+ * Narrows an unknown value to an `Evaluation`.
+ *
+ * Used on both sides: the server checks what the model returned, the browser
+ * checks what came back over the wire. It lives here, with no dependencies, so
+ * a `"use client"` file can import it without dragging the Anthropic SDK into
+ * the bundle along with it.
+ */
+export function isEvaluation(value: unknown): value is Evaluation {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Partial<Evaluation>;
+  return (
+    typeof v.score === "number" &&
+    Number.isInteger(v.score) &&
+    v.score >= 0 &&
+    v.score <= 5 &&
+    typeof v.feedback === "string" &&
+    typeof v.identifiedCorrectly === "boolean"
+  );
 }
 
 /* ── Quiz (Phase 1) ───────────────────────────────────────────────────── */
@@ -110,6 +137,23 @@ export interface Question {
 /** The three screens of the design, in the order they are reached. */
 export type Screen = "welcome" | "quiz" | "results";
 
+/**
+ * The two ways to answer a round. `classic` is the Phase 1 multiple-choice
+ * flow, unchanged; `rebuttal` is the Phase 2 free-text flow, graded out of
+ * five a question.
+ */
+export type QuizMode = "classic" | "rebuttal";
+
+/**
+ * Where the app is above the level of any single round. Welcome and the mode
+ * picker are shared; once a mode is chosen the matching flow takes over and
+ * runs on its own machine, so nothing here needs to know how a round works.
+ */
+export type Route =
+  | { name: "welcome" }
+  | { name: "mode" }
+  | { name: "round"; mode: QuizMode };
+
 export interface AnswerRecord {
   questionId: string;
   pickedId: TacticId;
@@ -126,4 +170,53 @@ export interface QuizState {
   /** Whether the current question's answer is locked in and feedback showing. */
   submitted: boolean;
   answers: AnswerRecord[];
+}
+
+/* ── Rebuttal state (see lib/rebuttal-machine.ts) ─────────────────────── */
+
+/**
+ * Where one question is in the write → grade → read cycle. The MCQ flow marks
+ * itself with a single `submitted` boolean because its answer is checked
+ * locally and instantly; grading is a round trip, so this flow needs a name
+ * for the wait — and for the failure, which a boolean cannot express.
+ */
+export type RebuttalPhase = "writing" | "grading" | "graded";
+
+export interface RebuttalRecord {
+  questionId: string;
+  /** Verbatim, so the results screen can show them what they wrote. */
+  response: string;
+  evaluation: Evaluation;
+}
+
+export interface RebuttalState {
+  /** Reuses the quiz screens; there is no separate welcome inside a round. */
+  screen: Extract<Screen, "quiz" | "results">;
+  questions: Question[];
+  index: number;
+  /** What is in the textarea, before it is sent to be graded. */
+  draft: string;
+  phase: RebuttalPhase;
+  /**
+   * Set when grading failed. The draft survives, so retrying costs the learner
+   * nothing — a network blip must never eat an answer they just wrote.
+   */
+  error: string | null;
+  records: RebuttalRecord[];
+}
+
+/** Body of a `POST /api/grade` request. */
+export type GradeRequest = RebuttalSubmission;
+
+/** Narrows an unknown parsed JSON body to a grading request. */
+export function isGradeRequest(value: unknown): value is GradeRequest {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Partial<GradeRequest>;
+  return (
+    typeof v.quote === "string" &&
+    typeof v.tacticId === "string" &&
+    typeof v.tacticName === "string" &&
+    typeof v.tacticExplanation === "string" &&
+    typeof v.response === "string"
+  );
 }

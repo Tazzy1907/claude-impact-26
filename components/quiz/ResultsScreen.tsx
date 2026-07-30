@@ -1,4 +1,4 @@
-import { Check, RotateCcw, X } from "lucide-react";
+import { Check, RotateCcw, Shuffle, X } from "lucide-react";
 import type { QuizConfig } from "@/lib/config";
 import { reviewRows, scoreMessage, scoreRound, type ReviewRow } from "@/lib/scoring";
 import type { QuizState } from "@/lib/types";
@@ -12,9 +12,16 @@ interface ResultsScreenProps {
   state: QuizState;
   reviewDetail: QuizConfig["reviewDetail"];
   onRestart: () => void;
+  /** Back to the mode picker. Without it this screen is a dead end. */
+  onChangeMode: () => void;
 }
 
-export function ResultsScreen({ state, reviewDetail, onRestart }: ResultsScreenProps) {
+export function ResultsScreen({
+  state,
+  reviewDetail,
+  onRestart,
+  onChangeMode,
+}: ResultsScreenProps) {
   const score = scoreRound(state);
   const rows = reviewRows(state);
 
@@ -57,6 +64,11 @@ export function ResultsScreen({ state, reviewDetail, onRestart }: ResultsScreenP
         <button type="button" className="btn btn-primary btn-block" onClick={onRestart}>
           Start again
           <RotateCcw size={14} aria-hidden="true" />
+        </button>
+
+        <button type="button" className="btn btn-secondary btn-block" onClick={onChangeMode}>
+          Try the other way
+          <Shuffle size={14} aria-hidden="true" />
         </button>
       </div>
     </main>
