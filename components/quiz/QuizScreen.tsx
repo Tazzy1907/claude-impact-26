@@ -63,7 +63,12 @@ export function QuizScreen({
 
         <div className="card mb-4 p-4">
           <div className="card-kicker">The argument</div>
-          <p className="m-0 text-justify text-[17px] leading-[1.5]">
+          {/* Two-speaker items put each turn on its own line, so the breaks are
+              load-bearing: run them together and you lose track of who is
+              answering whom. Justification is dropped with them — it stretches
+              a short turn across the full column. Single-statement items are
+              unaffected, having no breaks to preserve. */}
+          <p className="m-0 whitespace-pre-line text-[17px] leading-[1.5]">
             {question.statement}
           </p>
         </div>

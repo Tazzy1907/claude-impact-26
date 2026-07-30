@@ -4,7 +4,7 @@ import { useState } from "react";
 import { QuizScreen } from "@/components/quiz/QuizScreen";
 import { ResultsScreen } from "@/components/quiz/ResultsScreen";
 import { QUIZ_CONFIG } from "@/lib/config";
-import { getQuestions, shuffleQuestions } from "@/lib/content";
+import { pickRound } from "@/lib/content";
 import { initialState, primaryAction, selectOption, startQuiz } from "@/lib/quiz-machine";
 import type { TacticId } from "@/lib/types";
 
@@ -15,6 +15,9 @@ import type { TacticId } from "@/lib/types";
  *
  * It starts on the quiz screen rather than the welcome one: by the time this
  * mounts, the learner has already been through welcome and the mode picker.
+ * That is also what makes drawing the round in the initialiser safe — `useState`
+ * runs it once, on mount, in the browser, in response to the click that chose
+ * this mode. Nothing is server-rendered from it.
  */
 
 interface ClassicFlowProps {
@@ -23,14 +26,15 @@ interface ClassicFlowProps {
 }
 
 export function ClassicFlow({ onOpenDefinition, onChangeMode }: ClassicFlowProps) {
-  const [state, setState] = useState(() => startQuiz(initialState(getQuestions())));
+  const [state, setState] = useState(() => startQuiz(initialState(pickRound())));
 
   const restart = () =>
     setState((prev) =>
-      startQuiz(
-        prev,
-        QUIZ_CONFIG.shuffleOnRestart ? shuffleQuestions(prev.questions) : getQuestions(),
-      ),
+      /* A fresh draw by default: with five questions coming out of forty,
+         "Start again" returning the same five would waste the bank. Setting
+         the flag false replays the round just finished instead, for anyone
+         who wants another go at the ones they missed. */
+      startQuiz(prev, QUIZ_CONFIG.shuffleOnRestart ? pickRound() : prev.questions),
     );
 
   if (state.screen === "results") {

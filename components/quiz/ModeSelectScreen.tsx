@@ -2,7 +2,7 @@
 
 import { ArrowRight, ListChecks, PenLine } from "lucide-react";
 import { useState } from "react";
-import { MODES } from "@/content/modes";
+import { MODE_SCREEN, MODES } from "@/content/modes";
 import type { QuizMode } from "@/lib/types";
 
 /**
@@ -29,12 +29,9 @@ export function ModeSelectScreen({ onStart }: ModeSelectScreenProps) {
   return (
     <main className="flex flex-1 items-center justify-center px-4 py-8">
       <div className="w-full max-w-[640px]">
-        <div className="card-kicker">Two ways to practise</div>
-        <h2 className="mt-2">How do you want to answer?</h2>
-        <p>
-          Same five arguments either way. The difference is whether you name the
-          tactic from a list, or say in your own words what&rsquo;s going on.
-        </p>
+        <div className="card-kicker">{MODE_SCREEN.kicker}</div>
+        <h2 className="mt-2">{MODE_SCREEN.title}</h2>
+        <p>{MODE_SCREEN.intro}</p>
 
         <div className="hr" />
 

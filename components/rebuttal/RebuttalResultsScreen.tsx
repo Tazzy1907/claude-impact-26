@@ -73,7 +73,10 @@ function ReviewCard({ row }: { row: RebuttalReviewRow }) {
         <ScoreMark score={row.evaluation.score} />
       </div>
 
-      <p className="mt-0 mb-2 text-justify text-[14px] opacity-85">{row.statement}</p>
+      {/* Speaker turns keep their line breaks here too. */}
+      <p className="mt-0 mb-2 whitespace-pre-line text-[14px] opacity-85">
+        {row.statement}
+      </p>
 
       <div className="text-[13px]">
         <div className="card-kicker">You wrote</div>

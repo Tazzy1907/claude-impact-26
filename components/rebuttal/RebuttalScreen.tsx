@@ -67,7 +67,10 @@ export function RebuttalScreen({
 
         <div className="card mb-4 p-4">
           <div className="card-kicker">The argument</div>
-          <p className="m-0 text-justify text-[17px] leading-[1.5]">
+          {/* Two-speaker items put each turn on its own line and the breaks are
+              load-bearing, exactly as on the MCQ screen. Justification goes
+              with them — it stretches a short turn across the full column. */}
+          <p className="m-0 whitespace-pre-line text-[17px] leading-[1.5]">
             {question.statement}
           </p>
         </div>

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { RebuttalResultsScreen } from "@/components/rebuttal/RebuttalResultsScreen";
 import { RebuttalScreen } from "@/components/rebuttal/RebuttalScreen";
 import { QUIZ_CONFIG } from "@/lib/config";
-import { getQuestions, getTactic, shuffleQuestions } from "@/lib/content";
+import { getTactic, pickRound } from "@/lib/content";
 import {
   advance,
   beginGrading,
@@ -21,6 +21,11 @@ import { isEvaluation, type RebuttalSubmission, type TacticId } from "@/lib/type
 /**
  * The free-text round. Holds the state machine and owns the one impure part of
  * the flow — the call to the grader — so both screens stay presentational.
+ *
+ * It draws its own round from the bank, the same way the MCQ flow does. Five
+ * questions at five marks each is what makes the round total twenty-five, so
+ * the sampling in `pickRound` is load-bearing here rather than incidental:
+ * handing over the whole forty-question bank would score out of two hundred.
  */
 
 const GENERIC_FAILURE = "Couldn't reach the grader. Your answer is still here — try again.";
@@ -31,7 +36,7 @@ interface RebuttalFlowProps {
 }
 
 export function RebuttalFlow({ onOpenDefinition, onChangeMode }: RebuttalFlowProps) {
-  const [state, setState] = useState(() => initialRebuttalState(getQuestions()));
+  const [state, setState] = useState(() => initialRebuttalState(pickRound()));
 
   // Grading is the one request in the app that can outlive its screen. Holding
   // the controller lets an unmount — or leaving mid-grade — cancel it rather
@@ -86,9 +91,9 @@ export function RebuttalFlow({ onOpenDefinition, onChangeMode }: RebuttalFlowPro
   const restart = () => {
     inFlight.current?.abort();
     setState((prev) =>
-      initialRebuttalState(
-        QUIZ_CONFIG.shuffleOnRestart ? shuffleQuestions(prev.questions) : getQuestions(),
-      ),
+      // A fresh draw by default, matching the MCQ round. Off replays the same
+      // five, which here means another attempt at rebuttals you scored low on.
+      initialRebuttalState(QUIZ_CONFIG.shuffleOnRestart ? pickRound() : prev.questions),
     );
   };
 

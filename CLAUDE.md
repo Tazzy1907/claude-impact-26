@@ -34,9 +34,10 @@ The premise: the attention economy rewards outrage, and the people best at explo
 > the new branch adding before it is the specification again. Until then it is
 > authoritative for the welcome screen and the MCQ round only.
 
-**Phase 2 (current).** A second way to answer the same five questions: instead
-of picking from four options, the learner writes what's going on in their own
-words and a grader marks it out of five, for a round total of twenty-five. The
+**Phase 2 (current).** A second way to answer: instead of picking from four
+options, the learner writes what's going on in their own words and a grader
+marks it out of five. Both rounds draw their own `pickRound()` sample, so the
+free-text total is `ROUND_SIZE × 5` — twenty-five as the bank stands. The
 welcome screen is shared; a mode picker sits between it and the round.
 
 The grader is a seam with two implementations behind it, chosen by
