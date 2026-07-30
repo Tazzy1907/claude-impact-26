@@ -42,23 +42,29 @@ Do not add Claude API calls in Phase 1. The content is static; a live demo shoul
 - No database, no auth, no server state. Session progress lives in React state; anything that must survive a refresh goes in `localStorage`.
 
 ```
+DESIGN.md               # how the Classical design system reaches the browser
 app/
-  page.tsx              # Phase 1: the quiz (currently the scaffold's chat UI)
-  layout.tsx            # root layout — Geist fonts, flex-column shell
-  globals.css           # Tailwind entry + theme tokens (see Styling & theming)
+  page.tsx              # Phase 1: the quiz
+  layout.tsx            # root layout — Cormorant/Lora fonts, flex-column shell
+  globals.css           # Tailwind entry, Classical tokens, component layer
   api/chat/route.ts     # streaming HTTP layer — unused in Phase 1, kept for Phase 2
-components/             # to be created
-  quiz/                 # QuestionCard, OptionButton, AnswerReveal, ProgressBar
-  ui/                   # generic primitives (Button, Popover, Card)
-content/                # to be created
+components/
+  quiz/                 # QuestionCard, OptionList, AnswerReveal, ProgressRule,
+                        #   RoundSummary
+content/
   tactics.ts            # the taxonomy — definitions, examples
   questions.ts          # the question bank
 lib/
-  types.ts              # shared types; chat Message types already live here
+  types.ts              # shared types; chat Message types live here too
+  content.ts            # the only door onto content/ — see Architectural seams
   agent.ts              # Claude calls — placeholder, untouched in Phase 1
-  quiz-machine.ts       # pure state transitions — to be created
-  scoring.ts            # pure scoring — to be created
+  quiz-machine.ts       # pure state transitions
+  scoring.ts            # pure scoring
 ```
+
+There is no `components/ui/` yet. Classical's primitives arrive as global CSS
+classes (`.btn`, `.card`, `.tag`, `.input`) rather than React wrappers, so one
+is only worth adding when a primitive needs real behaviour.
 
 `app/layout.tsx` sets `<html class="h-full">` and `<body class="min-h-full flex flex-col">`, so the page is a flex column filling the viewport. Top-level page content needs `flex-1` to claim the space — the scaffold's `<main>` shows the pattern.
 
@@ -66,11 +72,13 @@ lib/
 
 **Tailwind v4 is configured in CSS, not JavaScript.** There is no `tailwind.config.*` and adding one is the wrong move. Design tokens live in the `@theme inline` block in `app/globals.css`; extend the palette there and the utility classes follow.
 
-**Dark mode is automatic**, driven by `prefers-color-scheme` in `app/globals.css`, and the scaffold pairs `dark:` variants throughout its markup. Every quiz surface must therefore be legible in both schemes — a card that only works on white is a broken card. Verify both before calling a component done.
+**The look comes from Classical**, a design system authored in Claude Design and ported into `app/globals.css`. **`DESIGN.md` is the authoritative guide** — read it before touching styling. The short version: raw values live in `:root` as `--ds-*`, `@theme inline` republishes them under Tailwind's namespaces, and you take every colour, font, space, radius and shadow from a token.
 
-**Fonts are already wired.** Geist Sans and Geist Mono are loaded in `app/layout.tsx` and exposed as `--font-sans` / `--font-mono`, so `font-sans` and `font-mono` just work. Don't import another font.
+**Dark mode is automatic**, driven by `prefers-color-scheme` in `app/globals.css`. Every quiz surface must be legible in both schemes — a card that only works on white is a broken card. Verify both before calling a component done. You should not need `dark:` variants: the tonal ramps are semantic and reverse in dark mode, so `--color-accent-100` is always the faintest tint on the current ground. Reach for ramp steps by role and both schemes follow.
 
-`--background` / `--foreground` are the semantic base colours. Prefer them and the `black/N` `white/N` opacity pattern the scaffold uses over hardcoded greys, so light and dark stay in step.
+**Fonts are wired to Classical's pairing** — Cormorant Garamond headings over Lora body, loaded via `next/font/google` in `app/layout.tsx` and exposed as `--font-heading` / `--font-body`, so `font-heading` and `font-body` just work. Geist is gone. Don't import another font, and don't swap in a sans-serif for emphasis — weight and italics do that job.
+
+`--color-bg` / `--color-text` are the semantic base colours, with `--color-surface` one step off the ground and `--color-divider` for hairlines. Prefer these and the tonal ramps over hardcoded greys or ad-hoc `color-mix()`, so light and dark stay in step.
 
 **Content lives in `content/` and nowhere else.** No question text, quote, or tactic definition inline in a component — ever. This is the seam that lets Phase 2 swap a static bank for a generated one without touching the UI.
 
@@ -81,7 +89,10 @@ lib/
 Quiz types go in `lib/types.ts`, alongside the existing chat `Message` types. Keep the two groups visually separated; they serve different phases.
 
 ```ts
-type TacticId = string; // kebab-case slug, e.g. 'straw-man'; narrow to a union once tactics.ts exists
+// A union of the 22 kebab-case slugs, e.g. 'straw-man'. `content/tactics.ts`
+// is typed `Record<TacticId, Tactic>`, so the build fails if an id has no
+// definition behind it and a question can't reference a tactic that doesn't exist.
+type TacticId = 'ad-hominem' | 'straw-man' | /* … */ 'sealioning';
 
 type TacticFamily = 'logical-fallacy' | 'emotional-manipulation' | 'rhetorical-trick';
 
